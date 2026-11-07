@@ -22,7 +22,7 @@ Règles éditoriales et visuelles de la refonte. Pour l'hébergement et la mise 
 - **Inscription** (page Tarifs & inscription, section `#inscription`) : en premier choix, un dépliant « Remplir mon dossier en ligne » (`#dossier`) qui génère le dossier en PDF à partir des documents originaux ; en second choix, un dépliant plus discret pour télécharger les documents vierges (`#documents`). Les textes d'aide du formulaire sont des textes d'interface, pas des textes de Guillaume.
 - **Type d'abonnement par étapes** : catégorie (Adulte / Ados – Kids, pré-sélectionnée d'après la date de naissance), puis discipline (Muay Thai, MMA, les deux, ou 100 % féminin pour les adultes), puis durée (annuel ou semestre, adultes uniquement).
 - **Ordre des cours** : Muay Thai, MMA, Muay Thai kids / ados, Muay Thai féminin, chacun avec son icône (`src/components/IconeCours.astro`).
-- **Coachs sans photo ni présentation** (Jean, Philippe) : la fiche affiche « Photo à venir » et « Présentation à venir » jusqu'à ce qu'on les complète dans `/admin`.
+- **Coachs sans photo ni présentation** (Jean, Phil) : la fiche affiche « Photo à venir » et « Présentation à venir » jusqu'à ce qu'on les complète dans `/admin`.
 - **Pied de page commun** à toutes les pages : adresses des 2 salles, téléphone, e-mail, réseaux sociaux (Facebook, Instagram, YouTube). Il n'y a donc pas de page Contact.
 - La page « À propos » disparaît, mais **tout son texte est repris** sur l'accueil.
 
