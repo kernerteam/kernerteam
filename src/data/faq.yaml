@@ -1,0 +1,13 @@
+# La question sur le cours d'essai est dans src/content/textes/essai.md
+# (elle est aussi affichée sur la page Tarifs & inscription).
+questions:
+  - question: Le FIGHT-CLUB du Vendredi est-il réservé uniquement aux compétiteurs ?
+    reponse: Nous intitulons les cours du Vendredi "FIGHT-CLUB" afin que cette journée permette aux élèves de la KT à travers des ateliers d’opposition (sparring) de mettre en application les figures techniques transmises lors de nos cours collectifs.
+  - question: Est-ce que mon adhésion me permet de participer à tous les cours ?
+    reponse: L’adhésion permet l’accès à tous nos cours dans la discipline concernée.
+  - question: Quel matériel dois-je apporter pour mon premier cours ?
+    reponse: Pour le MUAY THAI un short (de préférence de MUAY THAI) et un t-shirt suffisent, un protège-dents, des gants (ils peuvent être fournis au premier cours), des protège-tibias sont requis. Pour le MMA il faudra de préférence un short de MMA. En grappling un short et un rashguard.
+  - question: Je suis une femme, est-ce que la KERNER TEAM est adaptée pour moi ?
+    reponse: Absolument, nous avons des femmes dans tous nos cours mixtes et nous proposons aussi des cours 100% féminins.
+  - question: Est-ce que vous fournissez l’équipement de boxe ?
+    reponse: Non, vous devez venir avec votre propre équipement personnel.

@@ -1,0 +1,111 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { typo } from '../lib/typo.mjs';
+import archives from '../assets/images/archives.jpg';
+import portrait from '../assets/images/guillaume.jpg';
+
+const guillaume = (await getEntry('textes', 'guillaume'))!;
+const { Content: Histoire } = await render(guillaume);
+
+const coachs = await Promise.all(
+  (await getCollection('coachs'))
+    .sort((a, b) => a.data.ordre - b.data.ordre)
+    .map(async (c) => ({ ...c.data, id: c.id, aUneBio: Boolean(c.body?.trim()), Bio: (await render(c)).Content })),
+);
+---
+
+<Base titre="L'équipe" description="Guillaume Kerner, « L'Ange Blond » du Muay Thai, champion du monde 1995, et les coachs de la Kerner Team.">
+  <section class="section" id="guillaume">
+    <div class="conteneur">
+      <p class="surtitre">Équipe Kerner</p>
+      <div class="guillaume">
+        <Image src={portrait} alt="Portrait de Guillaume Kerner" width={183} height={275} class="guillaume__portrait" />
+        <div>
+          <h1 class="titre-page">{guillaume.data.titre}</h1>
+          {guillaume.data.sous_titre && <p class="guillaume__sous-titre">{typo(guillaume.data.sous_titre)}</p>}
+        </div>
+      </div>
+    </div>
+    <div class="archives">
+      <Image src={archives} alt="Photos d'archives de Guillaume Kerner : portrait et combats" widths={[800, 1280, 1980]} sizes="100vw" />
+    </div>
+    <div class="conteneur">
+      <div class="texte-long histoire"><Histoire /></div>
+    </div>
+  </section>
+
+  <section class="section section--panneau" id="coachs">
+    <div class="conteneur">
+      <h2 class="titre-section">NOS COACHS</h2>
+      <div class="coachs">
+        {
+          coachs.map((c) => (
+            <article class="coach" id={c.id}>
+              {c.photo ? (
+                <Image src={c.photo} alt={`Portrait de ${c.nom.toLowerCase().replace(/(^|\s)\S/g, (l) => l.toUpperCase())}`} widths={[300, 480, 640]} sizes="(min-width: 1100px) 360px, (min-width: 640px) 50vw, 100vw" class="coach__photo" />
+              ) : (
+                <div class="coach__photo coach__photo--attente"><span>Photo à venir</span></div>
+              )}
+              <div class="coach__texte">
+                <h3>{c.nom}</h3>
+                {c.aUneBio ? <c.Bio /> : <p class="coach__attente">Présentation à venir.</p>}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .guillaume { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 24px; margin-bottom: 32px; }
+  .guillaume__portrait {
+    width: 140px;
+    border: 3px solid var(--rouge);
+    border-radius: var(--rayon);
+    filter: grayscale(1);
+  }
+  .guillaume .titre-page { margin: 0; }
+  .guillaume__sous-titre {
+    font-family: var(--titres);
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    color: var(--rouge-texte);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 4px 0 0;
+  }
+  .archives {
+    border-block: 1px solid var(--bord);
+    margin-bottom: 40px;
+    background: #000;
+  }
+  .archives :global(img) { width: 100%; max-width: 1980px; margin-inline: auto; }
+  .histoire { margin-inline: auto; }
+
+  .coachs { display: grid; gap: 20px; }
+  @media (min-width: 640px) { .coachs { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .coachs { grid-template-columns: repeat(3, 1fr); } }
+  .coach {
+    background: var(--panneau-plein);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    overflow: hidden;
+  }
+  .coach__photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 20%; filter: grayscale(0.15); }
+  .coach__photo--attente {
+    display: grid;
+    place-items: center;
+    background: repeating-linear-gradient(-45deg, #161616 0 14px, #1c1c1c 14px 28px);
+    color: var(--texte-doux);
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .coach__texte .coach__attente { font-style: italic; }
+  .coach__texte { padding: 20px 22px 24px; border-top: 4px solid var(--rouge); }
+  .coach__texte h3 { font-size: 1.6rem; margin-bottom: 0.4em; }
+  .coach__texte :global(p) { color: var(--texte-doux); font-size: 1rem; }
+</style>

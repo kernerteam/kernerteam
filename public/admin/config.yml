@@ -1,0 +1,249 @@
+# Configuration de l'interface d'administration (Sveltia CMS).
+# Les formulaires décrits ici écrivent dans les fichiers de src/data et src/content.
+# Toute donnée est revalidée au build par src/content.config.ts.
+
+backend:
+  name: github
+  # À METTRE À JOUR si le dépôt est transféré (ex. au compte de Guillaume ou de l'association).
+  repo: marinsucks/kernerteam
+  branch: main
+  # À REMPLACER par l'URL du Worker Cloudflare sveltia-cms-auth (voir INFRA.md).
+  base_url: https://sveltia-cms-auth.A-REMPLACER.workers.dev
+  commit_messages:
+    create: "Ajout de {{collection}} « {{slug}} »"
+    update: "Mise à jour de {{collection}} « {{slug}} »"
+    delete: "Suppression de {{collection}} « {{slug}} »"
+    uploadMedia: "Ajout du fichier « {{path}} »"
+    deleteMedia: "Suppression du fichier « {{path}} »"
+
+site_url: https://kernerteam.net
+display_url: https://kernerteam.net
+logo_url: /favicon.png
+
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+collections:
+  # ---------------------------------------------------------------- Planning
+  - name: planning
+    label: Planning
+    icon: calendar_month
+    files:
+      - name: planning
+        label: Planning des cours
+        file: src/data/planning.yaml
+        fields:
+          - name: cours
+            label: Cours
+            label_singular: Cours
+            widget: list
+            summary: "{{fields.jour}} · {{fields.debut}}–{{fields.fin}} · {{fields.intitule}} · {{fields.salle}}"
+            fields:
+              - name: jour
+                label: Jour
+                widget: select
+                options:
+                  - { label: Lundi, value: lundi }
+                  - { label: Mardi, value: mardi }
+                  - { label: Mercredi, value: mercredi }
+                  - { label: Jeudi, value: jeudi }
+                  - { label: Vendredi, value: vendredi }
+                  - { label: Samedi, value: samedi }
+                  - { label: Dimanche, value: dimanche }
+              - name: debut
+                label: Heure de début
+                hint: "Format HH:MM, par exemple 07:00 ou 19:30"
+                widget: string
+                pattern: ['^([01]\d|2[0-3]):[0-5]\d$', "Format attendu : HH:MM (ex. 19:00)"]
+              - name: fin
+                label: Heure de fin
+                hint: "Format HH:MM, par exemple 08:00 ou 21:00"
+                widget: string
+                pattern: ['^([01]\d|2[0-3]):[0-5]\d$', "Format attendu : HH:MM (ex. 20:30)"]
+              - name: intitule
+                label: Intitulé affiché
+                hint: "Ex. MUAY THAI, MMA, FIGHT CLUB MUAY THAI, MUAY THAI KIDS"
+                widget: string
+              - name: disciplines
+                label: Discipline(s)
+                hint: Sert au filtre du planning
+                widget: select
+                multiple: true
+                min: 1
+                options:
+                  - { label: Muay Thai, value: muay-thai }
+                  - { label: MMA, value: mma }
+              - name: public
+                label: Public
+                hint: Sert au filtre du planning
+                widget: select
+                options:
+                  - { label: Adultes, value: adultes }
+                  - { label: 100 % féminin, value: feminin }
+                  - { label: Ados, value: ados }
+                  - { label: Kids, value: kids }
+              - name: salle
+                label: Salle
+                widget: select
+                options:
+                  - { label: Rue Ordener, value: ordener }
+                  - { label: Boulevard Ney, value: ney }
+
+  # ---------------------------------------------------------------- Coachs
+  - name: coachs
+    label: Coachs
+    label_singular: Coach
+    icon: sports_martial_arts
+    folder: src/content/coachs
+    extension: md
+    format: frontmatter
+    create: true
+    delete: true
+    identifier_field: nom
+    slug: "{{nom}}"
+    summary: "{{nom}}"
+    sortable_fields: [ordre, nom]
+    # Les photos sont enregistrées à côté de la fiche du coach.
+    media_folder: ""
+    public_folder: ""
+    fields:
+      - { name: nom, label: Nom, widget: string }
+      - name: ordre
+        label: Ordre d'affichage
+        hint: 1 = premier
+        widget: number
+        value_type: int
+        min: 1
+      - name: photo
+        label: Photo
+        hint: Portrait individuel uniquement (pas de photo de groupe). Sans photo, « Photo à venir » s'affiche.
+        widget: image
+        required: false
+      - { name: body, label: Présentation, widget: markdown, buttons: [bold, italic, link], required: false, hint: "Sans texte, « Présentation à venir » s'affiche." }
+
+  # ---------------------------------------------------------------- Textes
+  - name: textes
+    label: Textes des pages
+    label_singular: Texte
+    icon: article
+    folder: src/content/textes
+    extension: md
+    format: frontmatter
+    create: false
+    delete: false
+    identifier_field: titre
+    summary: "{{titre}}"
+    fields:
+      - { name: titre, label: Titre, widget: string }
+      - { name: sous_titre, label: Sous-titre, widget: string, required: false }
+      - { name: body, label: Texte, widget: markdown, buttons: [bold, italic, link, heading-three, bulleted-list] }
+
+  # ---------------------------------------------------------------- Infos
+  - name: infos
+    label: Infos, tarifs et FAQ
+    icon: info
+    files:
+      - name: site
+        label: Coordonnées et salles
+        file: src/data/site.yaml
+        fields:
+          - { name: nom, label: Nom, widget: string }
+          - { name: accroche, label: Accroche (haut de l'accueil), widget: text }
+          - { name: telephone, label: Téléphone, widget: string }
+          - { name: email, label: E-mail, widget: string }
+          - name: reseaux
+            label: Réseaux sociaux
+            widget: object
+            fields:
+              - { name: facebook, label: Facebook, widget: string, required: false }
+              - { name: instagram, label: Instagram, widget: string, required: false }
+              - { name: youtube, label: YouTube, widget: string, required: false }
+          - name: salles
+            label: Salles
+            widget: object
+            fields:
+              - name: ordener
+                label: Salle rue Ordener
+                widget: object
+                fields:
+                  - { name: nom, label: Nom affiché, widget: string }
+                  - { name: adresse, label: Adresse, widget: string }
+                  - { name: code_postal_ville, label: Code postal et ville, widget: string }
+              - name: ney
+                label: Salle boulevard Ney
+                widget: object
+                fields:
+                  - { name: nom, label: Nom affiché, widget: string }
+                  - { name: adresse, label: Adresse, widget: string }
+                  - { name: code_postal_ville, label: Code postal et ville, widget: string }
+
+      - name: tarifs
+        label: Tarifs
+        file: src/data/tarifs.yaml
+        fields:
+          - name: formules
+            label: Formules
+            label_singular: Formule
+            widget: list
+            summary: "{{fields.titre}}"
+            fields:
+              - { name: titre, label: Titre, widget: string }
+              - { name: detail, label: Détail, widget: string, required: false }
+              - name: prix
+                label: Prix
+                label_singular: Prix
+                widget: list
+                summary: "{{fields.libelle}} : {{fields.montant}} €"
+                fields:
+                  - { name: libelle, label: Libellé, widget: string, hint: "Ex. ANNÉE, SEMESTRE, SÉANCE D'ESSAI" }
+                  - { name: montant, label: Montant (€), widget: number, value_type: int, min: 0 }
+          - { name: paiement, label: Moyens de paiement, widget: string, required: false }
+
+      - name: faq
+        label: FAQ
+        file: src/data/faq.yaml
+        fields:
+          - name: questions
+            label: Questions
+            label_singular: Question
+            hint: "La question sur le cours d'essai se modifie dans Textes des pages → « Un cours d'essai est-il possible… »"
+            widget: list
+            summary: "{{fields.question}}"
+            fields:
+              - { name: question, label: Question, widget: string }
+              - { name: reponse, label: Réponse, widget: text }
+
+      - name: accueil
+        label: Accueil (titres et atouts)
+        file: src/data/accueil.yaml
+        fields:
+          - { name: titre_salles, label: Titre de la section salles, widget: string }
+          - { name: titre_atouts, label: Titre de la section atouts, widget: string }
+          - name: atouts
+            label: Atouts
+            label_singular: Atout
+            widget: list
+            summary: "{{fields.titre}}"
+            fields:
+              - { name: titre, label: Titre, widget: string }
+              - { name: texte, label: Texte, widget: text }
+              - { name: lien_libelle, label: Texte du lien, widget: string }
+              - { name: lien, label: Adresse du lien, widget: string, hint: "Ex. /equipe/#coachs" }
+
+      - name: documents
+        label: Documents à télécharger
+        file: src/data/documents.yaml
+        fields:
+          - { name: titre, label: Titre de la section, widget: string }
+          - name: documents
+            label: Documents
+            label_singular: Document
+            widget: list
+            summary: "{{fields.titre}}"
+            fields:
+              - { name: titre, label: Nom du document, widget: string }
+              - name: fichier
+                label: Fichier
+                widget: file
+                media_folder: /public/documents
+                public_folder: /documents

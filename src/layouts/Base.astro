@@ -1,0 +1,145 @@
+---
+import '@fontsource/fjalla-one';
+import '@fontsource-variable/work-sans';
+import '../styles/global.css';
+import { Image, getImage } from 'astro:assets';
+import { getEntry } from 'astro:content';
+import fond from '../assets/images/background.png';
+import logo from '../assets/images/logo.png';
+
+interface Props {
+  titre?: string;
+  description?: string;
+}
+
+const {
+  titre,
+  description = "École de boxe Muay Thai à Paris - Cours adaptés à tous les niveaux au sein de la Kerner Team. Rejoignez-nous pour des séances de Muay Thai exceptionnelles !",
+} = Astro.props;
+
+const site = (await getEntry('site', 'site'))!.data;
+const fondWeb = await getImage({ src: fond, format: 'webp', width: 1400, quality: 55 });
+
+const pages = [
+  { href: '/', libelle: 'Accueil' },
+  { href: '/cours/', libelle: 'Cours & planning' },
+  { href: '/equipe/', libelle: "L'équipe" },
+  { href: '/tarifs/', libelle: 'Tarifs & inscription' },
+];
+const chemin = Astro.url.pathname.replace(/\/?$/, '/');
+const titreComplet = titre ? `${titre} – Kerner Team` : 'École de Boxe Thai – Kerner Team';
+
+// Le site témoin ne doit pas être indexé. En production : variable PUBLIC_INDEXABLE=true.
+const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true';
+
+const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.adresse}, ${s.code_postal_ville}`)}`;
+const salles = [site.salles.ordener, site.salles.ney];
+const telLien = `tel:${site.telephone.replace(/\s/g, '')}`;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    {!indexable && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="fr_FR" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+  </head>
+  <body style={`--fond: url(${fondWeb.src})`}>
+    <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+    <header class="entete">
+      <div class="conteneur entete__barre">
+        <a href="/" class="marque" aria-label="Kerner Team – accueil">
+          <Image src={logo} alt="" height={44} class="marque__logo" />
+          <span class="marque__nom">KERNER TEAM</span>
+        </a>
+        <button class="menu-bouton" type="button" aria-expanded="false" aria-controls="navigation">
+          <span class="menu-bouton__barres" aria-hidden="true"></span>
+          Menu
+        </button>
+        <nav id="navigation" class="navigation" aria-label="Navigation principale">
+          <ul>
+            {
+              pages.map((p) => (
+                <li>
+                  <a href={p.href} aria-current={chemin === p.href ? 'page' : undefined}>
+                    {p.libelle}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenu">
+      <slot />
+    </main>
+
+    <footer class="pied">
+      <div class="conteneur pied__grille">
+        <div class="pied__marque">
+          <Image src={logo} alt="" height={64} class="marque__logo" />
+          <p class="pied__nom">KERNER TEAM</p>
+          <p class="pied__sous-titre">Muay Thai · MMA · Paris 18e</p>
+        </div>
+
+        <div>
+          <h2 class="pied__titre">Nos salles</h2>
+          <ul class="pied__liste">
+            {
+              salles.map((s) => (
+                <li>
+                  <span class="pied__salle">{s.nom}</span>
+                  <br />
+                  {s.adresse}, {s.code_postal_ville}
+                  <br />
+                  <a href={itineraire(s)} rel="noopener" target="_blank">
+                    Itinéraire<span class="visuellement-cache"> vers la salle {s.nom} (nouvel onglet)</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+
+        <div>
+          <h2 class="pied__titre">Contact</h2>
+          <ul class="pied__liste">
+            <li><a href={telLien}>{site.telephone}</a></li>
+            <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          </ul>
+          <ul class="pied__reseaux">
+            {site.reseaux.facebook && <li><a href={site.reseaux.facebook} rel="noopener" target="_blank">Facebook</a></li>}
+            {site.reseaux.instagram && <li><a href={site.reseaux.instagram} rel="noopener" target="_blank">Instagram</a></li>}
+            {site.reseaux.youtube && <li><a href={site.reseaux.youtube} rel="noopener" target="_blank">YouTube</a></li>}
+          </ul>
+        </div>
+      </div>
+      <p class="conteneur pied__copyright">© {new Date().getFullYear()} Kerner Team – Tous droits réservés.</p>
+    </footer>
+
+    <script>
+      const bouton = document.querySelector<HTMLButtonElement>('.menu-bouton');
+      const nav = document.getElementById('navigation');
+      if (bouton && nav) {
+        bouton.addEventListener('click', () => {
+          const ouvert = bouton.getAttribute('aria-expanded') === 'true';
+          bouton.setAttribute('aria-expanded', String(!ouvert));
+          nav.classList.toggle('navigation--ouverte', !ouvert);
+        });
+      }
+    </script>
+  </body>
+</html>

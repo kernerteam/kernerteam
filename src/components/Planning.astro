@@ -1,0 +1,563 @@
+---
+// Planning des cours.
+// - Grand écran : calendrier avec axe horaire. Chaque cours est placé à sa hauteur réelle ;
+//   les cours qui se chevauchent sont côte à côte ; les heures sans aucun cours sont repliées.
+// - Petit écran : un onglet par jour (sans JavaScript, tous les jours s'affichent à la suite).
+import { getCollection, getEntry } from 'astro:content';
+import { JOURS } from '../content.config';
+import { typo } from '../lib/typo.mjs';
+
+const LIBELLES_JOURS: Record<(typeof JOURS)[number], [string, string]> = {
+  lundi: ['Lundi', 'Lun'], mardi: ['Mardi', 'Mar'], mercredi: ['Mercredi', 'Mer'], jeudi: ['Jeudi', 'Jeu'],
+  vendredi: ['Vendredi', 'Ven'], samedi: ['Samedi', 'Sam'], dimanche: ['Dimanche', 'Dim'],
+};
+
+const site = (await getEntry('site', 'site'))!.data;
+const nomCourt = (salle: 'ordener' | 'ney') => site.salles[salle].nom.split(' ').pop()!;
+
+const minutes = (h: string) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3, 5));
+// "07:00" → "7h", "12:30" → "12h30"
+const heure = (h: string) => h.replace(/^0(\d)/, '$1').replace(':00', 'h').replace(':', 'h');
+
+const cours = (await getCollection('planning')).map((c) => ({
+  ...c.data,
+  de: minutes(c.data.debut),
+  a: minutes(c.data.fin),
+}));
+
+// ---- Axe vertical : 1 unité = 5 minutes ; une heure = 12 unités ; un pli (heures vides) = 3 unités.
+const UNITES_HEURE = 12;
+const UNITES_PLI = 3;
+const debutJournee = Math.floor(Math.min(...cours.map((c) => c.de)) / 60) * 60;
+const finJournee = Math.ceil(Math.max(...cours.map((c) => c.a)) / 60) * 60;
+
+type Segment = { type: 'heure'; h: number; y: number } | { type: 'pli'; de: number; a: number; y: number };
+const segments: Segment[] = [];
+let y = 0;
+for (let h = debutJournee; h < finJournee; h += 60) {
+  const occupee = cours.some((c) => c.de < h + 60 && c.a > h);
+  const precedent = segments.at(-1);
+  if (occupee) {
+    segments.push({ type: 'heure', h, y });
+    y += UNITES_HEURE;
+  } else if (precedent?.type === 'pli') {
+    precedent.a = h + 60;
+  } else {
+    segments.push({ type: 'pli', de: h, a: h + 60, y });
+    y += UNITES_PLI;
+  }
+}
+const totalUnites = y;
+const position = (m: number) => {
+  const s = segments.find((s) => s.type === 'heure' && m >= s.h && m < s.h + 60);
+  if (s) return s.y + ((m - (s as { h: number }).h) / 60) * UNITES_HEURE;
+  return segments.find((s) => s.type === 'pli' && m >= s.de && m <= s.a)?.y ?? totalUnites;
+};
+
+// ---- Voies : les cours qui se chevauchent dans une même journée sont placés côte à côte.
+const avecVoies = (liste: typeof cours) => {
+  const tries = [...liste].sort((a, b) => a.de - b.de || a.a - b.a);
+  const resultat: (typeof cours[number] & { voie: number; voies: number })[] = [];
+  let groupe: typeof resultat = [];
+  let finGroupe = -1;
+  const fermer = () => {
+    const voies = Math.max(1, ...groupe.map((c) => c.voie + 1));
+    groupe.forEach((c) => (c.voies = voies));
+    resultat.push(...groupe);
+    groupe = [];
+  };
+  for (const c of tries) {
+    if (c.de >= finGroupe && groupe.length) fermer();
+    const finsVoies: number[] = [];
+    groupe.forEach((g) => (finsVoies[g.voie] = Math.max(finsVoies[g.voie] ?? 0, g.a)));
+    let voie = finsVoies.findIndex((fin) => fin <= c.de);
+    if (voie === -1) voie = finsVoies.length;
+    groupe.push({ ...c, voie, voies: 1 });
+    finGroupe = Math.max(finGroupe, c.a);
+  }
+  if (groupe.length) fermer();
+  return resultat;
+};
+
+// Le dimanche n'apparaît que s'il y a des cours ce jour-là.
+const jours = JOURS.filter((j) => j !== 'dimanche' || cours.some((c) => c.jour === j)).map((id) => ({
+  id,
+  libelle: LIBELLES_JOURS[id][0],
+  abrege: LIBELLES_JOURS[id][1],
+  cours: avecVoies(cours.filter((c) => c.jour === id)),
+}));
+
+const filtres = [
+  { nom: 'discipline', legende: 'Discipline', options: [['tous', 'Toutes'], ['muay-thai', 'Muay Thai'], ['mma', 'MMA']] },
+  { nom: 'public', legende: 'Public', options: [['tous', 'Tous'], ['adultes', 'Adultes'], ['feminin', '100 % féminin'], ['ados', 'Ados'], ['kids', 'Kids']] },
+  { nom: 'salle', legende: 'Salle', options: [['toutes', 'Toutes'], ['ordener', site.salles.ordener.nom], ['ney', site.salles.ney.nom]] },
+];
+
+const attributsCours = (c: (typeof cours)[number]) => ({
+  'data-disciplines': c.disciplines.join(' '),
+  'data-public': c.public,
+  'data-salle': c.salle,
+});
+---
+
+<div class="planning" data-planning>
+  <div class="planning__barre">
+    <form class="planning__filtres" data-filtres hidden aria-label="Filtrer le planning">
+      {
+        filtres.map((f) => (
+          <label class="filtre">
+            <span class="filtre__libelle">{f.legende}</span>
+            <select name={f.nom}>
+              {f.options.map(([valeur, libelle]) => (
+                <option value={valeur}>{libelle}</option>
+              ))}
+            </select>
+          </label>
+        ))
+      }
+      <p class="planning__compte" aria-live="polite" data-compte></p>
+    </form>
+    <ul class="planning__legende" aria-label="Légende des salles">
+      <li><span class="pastille pastille--ordener" aria-hidden="true"></span>{site.salles.ordener.nom}</li>
+      <li><span class="pastille pastille--ney" aria-hidden="true"></span>{site.salles.ney.nom}</li>
+    </ul>
+  </div>
+
+  <!-- Grand écran : calendrier -->
+  <div class="calendrier" style={`--unites: ${totalUnites}; --jours: ${jours.length}`}>
+    <div class="calendrier__entetes">
+      <span></span>
+      {
+        jours.map((j) => (
+          <p class="calendrier__jour" data-jour={j.id}>
+            {j.libelle}
+            <span class="badge-aujourdhui" hidden>Aujourd'hui</span>
+          </p>
+        ))
+      }
+    </div>
+    <div class="calendrier__corps">
+      <div class="calendrier__axe" aria-hidden="true">
+        {
+          segments.map((s) =>
+            s.type === 'heure' ? (
+              <span class="axe__heure" style={`--y: ${s.y}`}>{s.h / 60}h</span>
+            ) : (
+              <span class="axe__pli" style={`--y: ${s.y}`}>⋯</span>
+            ),
+          )
+        }
+      </div>
+      <div class="calendrier__grille">
+        <div class="calendrier__lignes" aria-hidden="true">
+          {segments.map((s) => <span class={s.type === 'heure' ? 'ligne' : 'ligne ligne--pli'} style={`--y: ${s.y}`} />)}
+        </div>
+        {
+          jours.map((j) => (
+            <section class="calendrier__colonne" data-jour={j.id} aria-label={j.libelle}>
+              {j.cours.map((c) => (
+                <article
+                  class={`cours cours--cal cours--${c.salle}${c.voies > 1 ? ' cours--etroit' : ''}`}
+                  style={`--y: ${position(c.de)}; --h: ${position(c.a) - position(c.de)}; --voie: ${c.voie}; --voies: ${c.voies}`}
+                  {...attributsCours(c)}
+                >
+                  <p class="cours__heure">
+                    <time datetime={c.debut}>{heure(c.debut)}</time>–<time datetime={c.fin}>{heure(c.fin)}</time>
+                  </p>
+                  <p class="cours__titre">{typo(c.intitule)}</p>
+                  <p class="cours__salle">{nomCourt(c.salle)}</p>
+                </article>
+              ))}
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Petit écran : un jour à la fois -->
+  <div class="liste">
+    <div class="onglets" role="tablist" aria-label="Jour" data-onglets hidden>
+      {
+        jours.map((j) => (
+          <button type="button" role="tab" class="onglet" id={`onglet-${j.id}`} aria-controls={`jour-${j.id}`} aria-selected="false" data-jour={j.id}>
+            {j.abrege}
+          </button>
+        ))
+      }
+    </div>
+    {
+      jours.map((j) => (
+        <section class="jour" id={`jour-${j.id}`} data-jour={j.id} aria-labelledby={`titre-${j.id}`}>
+          <h3 class="jour__titre" id={`titre-${j.id}`}>
+            {j.libelle}
+            <span class="badge-aujourdhui" hidden>Aujourd'hui</span>
+          </h3>
+          <ul class="jour__liste">
+            {[...j.cours].sort((a, b) => a.de - b.de).map((c) => (
+              <li class={`cours cours--liste cours--${c.salle}`} {...attributsCours(c)}>
+                <p class="cours__heure">
+                  <time datetime={c.debut}>{heure(c.debut)}</time> – <time datetime={c.fin}>{heure(c.fin)}</time>
+                </p>
+                <div>
+                  <p class="cours__titre">{typo(c.intitule)}</p>
+                  <p class="cours__salle">{site.salles[c.salle].nom}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p class="jour__vide" hidden={j.cours.length > 0}>Aucun cours</p>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  /* ---------- Filtres et légende ---------- */
+  /* Barre compacte : filtres à gauche, légende des salles à droite */
+  .planning__barre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+  }
+  .planning__filtres { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+  .filtre { display: grid; gap: 4px; flex: 1 1 140px; min-width: 0; }
+  .filtre__libelle {
+    font-family: var(--titres);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texte-doux);
+  }
+  .filtre select {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--texte);
+    background-color: #0b0b0b;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: var(--rayon);
+    padding: 7px 34px 7px 10px;
+    min-height: 40px;
+    width: 100%;
+    color-scheme: dark;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--texte-doux) 50%), linear-gradient(135deg, var(--texte-doux) 50%, transparent 50%);
+    background-position: right 16px center, right 11px center;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  .filtre select:focus-visible { outline: 3px solid var(--rouge-texte); outline-offset: 1px; }
+  /* Compteur et légende : même hauteur que les menus, centrés sur eux. */
+  .planning__compte,
+  .planning__legende {
+    margin: 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    color: var(--texte-doux);
+    font-size: 0.85rem;
+  }
+  .planning__compte { flex-basis: 100%; }
+  @media (min-width: 760px) { .planning__compte { flex-basis: auto; } }
+
+  .planning__legende {
+    list-style: none;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .planning__legende li { display: flex; align-items: center; gap: 8px; }
+  .pastille { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+  .pastille--ordener { background: var(--panneau-plein); border: 2px solid var(--texte); }
+  .pastille--ney { background: var(--rouge); border: 2px solid var(--rouge); }
+
+  .badge-aujourdhui {
+    font-family: var(--corps);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--rouge);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* ---------- Cours (commun) ---------- */
+  .cours {
+    border-radius: var(--rayon);
+    border: 2px solid var(--texte);
+    background: var(--panneau-plein);
+  }
+  .cours--ney { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+  .cours p { margin: 0; }
+  .cours .cours__heure { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .cours .cours__titre { font-family: var(--titres); letter-spacing: 0.03em; line-height: 1.2; }
+  .cours .cours__salle { text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+
+  /* ---------- Calendrier (grand écran) ---------- */
+  .calendrier { display: none; --u: 7px; }
+
+  @media (min-width: 1024px) {
+    .calendrier { display: block; }
+    .planning .liste { display: none; }
+  }
+
+  .calendrier__entetes,
+  .calendrier__corps {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+  }
+  .calendrier__entetes {
+    grid-template-columns: 44px repeat(var(--jours), 1fr);
+    gap: 6px;
+    position: sticky;
+    top: 68px;
+    z-index: 2;
+    background: rgb(10 10 10 / 0.94);
+    padding-block: 10px;
+    border-bottom: 1px solid var(--bord);
+  }
+  .calendrier__jour {
+    margin: 0;
+    font-family: var(--titres);
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding-inline: 4px;
+  }
+  .calendrier__jour.jour--aujourdhui { color: var(--rouge-texte); }
+
+  .calendrier__corps { margin-top: 8px; column-gap: 6px; }
+  .calendrier__axe { position: relative; height: calc(var(--unites) * var(--u)); }
+  .axe__heure,
+  .axe__pli {
+    position: absolute;
+    top: calc(var(--y) * var(--u));
+    right: 8px;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-doux);
+    font-variant-numeric: tabular-nums;
+  }
+  .axe__pli { transform: none; line-height: calc(3 * var(--u)); }
+
+  .calendrier__grille {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--jours), 1fr);
+    gap: 6px;
+    height: calc(var(--unites) * var(--u));
+  }
+  .calendrier__lignes { position: absolute; inset: 0; pointer-events: none; }
+  .ligne {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--y) * var(--u));
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .ligne--pli {
+    height: calc(3 * var(--u));
+    border-top: 0;
+    background: repeating-linear-gradient(-45deg, transparent 0 6px, rgb(255 255 255 / 0.04) 6px 12px);
+  }
+  .calendrier__colonne {
+    position: relative;
+    border-radius: var(--rayon);
+    background: rgb(255 255 255 / 0.015);
+  }
+  .calendrier__colonne.jour--aujourdhui { background: rgb(242 72 78 / 0.07); box-shadow: inset 0 0 0 1px rgb(242 72 78 / 0.5); }
+
+  .cours--cal {
+    position: absolute;
+    top: calc(var(--y) * var(--u) + 1px);
+    height: calc(var(--h) * var(--u) - 3px);
+    left: calc(var(--voie) * 100% / var(--voies));
+    width: calc(100% / var(--voies) - 3px);
+    padding: 5px 7px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .cours--cal .cours__heure { font-size: 0.8rem; white-space: nowrap; }
+  .cours--cal .cours__titre { font-size: 0.98rem; }
+  .cours--cal .cours__salle { font-size: 0.66rem; margin-top: auto; }
+  .cours--estompe { opacity: 0.12; }
+  .cours--etroit { padding: 4px 5px; }
+  .cours--etroit .cours__heure { font-size: 0.7rem; letter-spacing: -0.01em; white-space: nowrap; }
+  .cours--etroit .cours__titre { font-size: 0.84rem; }
+  .cours--etroit .cours__salle { font-size: 0.58rem; letter-spacing: 0.03em; }
+
+  /* ---------- Liste par jour (petit écran) ---------- */
+  .onglets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: 12px;
+    position: sticky;
+    top: 68px;
+    z-index: 2;
+    background: rgb(10 10 10 / 0.94);
+    padding-block: 8px;
+  }
+  .onglet {
+    font: inherit;
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--texte);
+    background: var(--panneau-plein);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .onglet[aria-selected='true'] { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+  .onglet.jour--aujourdhui:not([aria-selected='true']) { border-color: var(--rouge-texte); }
+
+  .liste { display: grid; gap: 12px; }
+  .planning--onglets .jour:not(.jour--choisi) { display: none; }
+  .jour {
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    padding: 12px;
+  }
+  .jour__titre {
+    font-size: 1.4rem;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .jour__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .jour__vide { color: var(--texte-doux); font-style: italic; margin: 0; }
+  .cours--liste {
+    display: grid;
+    grid-template-columns: 6.6em 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .cours--liste .cours__heure { font-size: 0.95rem; }
+  .cours--liste .cours__titre { font-size: 1.1rem; }
+  .cours--liste .cours__salle { font-size: 0.75rem; }
+</style>
+
+<script>
+  const racine = document.querySelector<HTMLElement>('[data-planning]');
+  const formulaire = racine?.querySelector<HTMLFormElement>('[data-filtres]');
+  const compte = racine?.querySelector<HTMLElement>('[data-compte]');
+  const onglets = racine?.querySelector<HTMLElement>('[data-onglets]');
+
+  if (racine && formulaire && compte && onglets) {
+    // ---- Filtres
+    const PAR_DEFAUT: Record<string, string> = { discipline: 'tous', public: 'tous', salle: 'toutes' };
+    formulaire.hidden = false;
+
+    // Filtres pré-sélectionnés depuis l'URL (ex. /cours/?salle=ney#planning)
+    const params = new URLSearchParams(location.search);
+    for (const nom of Object.keys(PAR_DEFAUT)) {
+      const valeur = params.get(nom);
+      if (!valeur) continue;
+      const liste = formulaire.elements.namedItem(nom) as HTMLSelectElement;
+      if ([...liste.options].some((o) => o.value === valeur)) liste.value = valeur;
+    }
+
+    const correspond = (cours: HTMLElement, choix: Record<string, string>) =>
+      (choix.discipline === 'tous' || cours.dataset.disciplines!.split(' ').includes(choix.discipline)) &&
+      (choix.public === 'tous' || cours.dataset.public === choix.public) &&
+      (choix.salle === 'toutes' || cours.dataset.salle === choix.salle);
+
+    const appliquer = () => {
+      const choix = Object.fromEntries(Object.keys(PAR_DEFAUT).map((n) => [n, String(new FormData(formulaire).get(n))]));
+
+      // Calendrier : les cours filtrés s'estompent pour garder les repères horaires.
+      racine.querySelectorAll<HTMLElement>('.cours--cal').forEach((c) => {
+        const ok = correspond(c, choix);
+        c.classList.toggle('cours--estompe', !ok);
+        c.setAttribute('aria-hidden', String(!ok));
+      });
+
+      // Liste par jour
+      let total = 0;
+      racine.querySelectorAll<HTMLElement>('.jour').forEach((jour) => {
+        let visibles = 0;
+        jour.querySelectorAll<HTMLElement>('.cours--liste').forEach((c) => {
+          const ok = correspond(c, choix);
+          c.hidden = !ok;
+          if (ok) visibles++;
+        });
+        jour.querySelector<HTMLElement>('.jour__vide')!.hidden = visibles > 0;
+        total += visibles;
+      });
+
+      compte.textContent = `${total} cours ${total > 1 ? 'affichés' : 'affiché'}`;
+
+      const url = new URL(location.href);
+      for (const [nom, defaut] of Object.entries(PAR_DEFAUT)) {
+        if (choix[nom] === defaut) url.searchParams.delete(nom);
+        else url.searchParams.set(nom, choix[nom]);
+      }
+      history.replaceState(null, '', url);
+    };
+
+    formulaire.addEventListener('change', appliquer);
+    appliquer();
+
+    // ---- Aujourd'hui
+    const NOMS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+    const aujourdhui = NOMS[new Date().getDay()];
+    racine.querySelectorAll<HTMLElement>(`[data-jour="${aujourdhui}"]`).forEach((el) => {
+      el.classList.add('jour--aujourdhui');
+      const badge = el.querySelector<HTMLElement>('.badge-aujourdhui');
+      if (badge) badge.hidden = false;
+    });
+
+    // ---- Onglets (petit écran)
+    const boutons = [...onglets.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const choisir = (jour: string, focus = false) => {
+      boutons.forEach((b) => {
+        const actif = b.dataset.jour === jour;
+        b.setAttribute('aria-selected', String(actif));
+        b.tabIndex = actif ? 0 : -1;
+        if (actif && focus) b.focus();
+      });
+      racine.querySelectorAll<HTMLElement>('.jour').forEach((s) => s.classList.toggle('jour--choisi', s.dataset.jour === jour));
+    };
+    racine.querySelectorAll<HTMLElement>('.jour').forEach((s) => s.setAttribute('role', 'tabpanel'));
+    onglets.hidden = false;
+    racine.classList.add('planning--onglets');
+    choisir(boutons.some((b) => b.dataset.jour === aujourdhui) ? aujourdhui : boutons[0].dataset.jour!);
+
+    onglets.addEventListener('click', (e) => {
+      const bouton = (e.target as HTMLElement).closest<HTMLButtonElement>('[role="tab"]');
+      if (bouton) choisir(bouton.dataset.jour!);
+    });
+    onglets.addEventListener('keydown', (e) => {
+      const i = boutons.findIndex((b) => b.getAttribute('aria-selected') === 'true');
+      const suivant = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : null;
+      if (suivant === null) return;
+      e.preventDefault();
+      choisir(boutons[(suivant + boutons.length) % boutons.length].dataset.jour!, true);
+    });
+  }
+</script>
