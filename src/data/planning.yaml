@@ -34,7 +34,7 @@ cours:
   - { jour: vendredi, debut: "19:00", fin: "20:30", intitule: FIGHT CLUB MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
   # Samedi
   - { jour: samedi, debut: "10:00", fin: "11:15", intitule: MUAY THAI 100 % FÉMININ, disciplines: [muay-thai], public: feminin, salle: ordener }
-  - { jour: samedi, debut: "13:00", fin: "14:30", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: samedi, debut: "13:00", fin: "14:30", intitule: MMA LUTTE, disciplines: [mma], public: adultes, salle: ordener }
   - { jour: samedi, debut: "13:30", fin: "15:00", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
   - { jour: samedi, debut: "15:30", fin: "16:30", intitule: MUAY THAI KIDS, disciplines: [muay-thai], public: kids, salle: ney }
   - { jour: samedi, debut: "16:30", fin: "17:30", intitule: MUAY THAI ADOS, disciplines: [muay-thai], public: ados, salle: ney }
