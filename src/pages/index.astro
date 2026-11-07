@@ -54,7 +54,7 @@ const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
         <h2 class="titre-section">{intro.titre}</h2>
         <div class="texte-long"><intro.Contenu /></div>
       </div>
-      <Image src={ordener2} alt="La salle de la rue Ordener : tatamis noirs au sol et aux murs, logos Kerner Team" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="photo" />
+      <Image src={ordener1} alt="La salle d'entraînement de la rue Ordener : sacs de frappe, tatamis et baies vitrées" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="photo" />
     </div>
   </section>
 
@@ -107,9 +107,9 @@ const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
       <div class="salles">
         <article class="salle">
           <div class="salle__photos">
-            <Image src={ordener1} alt="Salle de la rue Ordener : espace d'entraînement avec sacs de frappe et baies vitrées" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="salle__photo-principale" />
-            <Image src={ordener2} alt="Salle de la rue Ordener : tatamis et protections murales aux logos KT" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
-            <Image src={ordener3} alt="Salle de la rue Ordener : cage et sacs de frappe" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
+            <Image src={ordener3} alt="Salle d'entraînement de la rue Ordener : cage, sacs de frappe et fenêtres" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="salle__photo-principale" />
+            <Image src={ordener1} alt="Salle d'entraînement de la rue Ordener : sacs de frappe et baies vitrées" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
+            <Image src={ordener2} alt="Rue Ordener, espace des compétiteurs en sous-sol : tatamis et protections murales aux logos KT" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
           </div>
           <div class="salle__infos">
             <h3>{site.salles.ordener.nom}</h3>

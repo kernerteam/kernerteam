@@ -5,7 +5,7 @@
 backend:
   name: github
   # À METTRE À JOUR si le dépôt est transféré (ex. au compte de Guillaume ou de l'association).
-  repo: marinsucks/kernerteam
+  repo: kernerteam/kernerteam
   branch: main
   # À REMPLACER par l'URL du Worker Cloudflare sveltia-cms-auth (voir INFRA.md).
   base_url: https://sveltia-cms-auth.A-REMPLACER.workers.dev
