@@ -54,43 +54,35 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
       <h2 class="titre-section">{inscription.data.titre}</h2>
       <div class="texte-long inscription"><Inscription /></div>
 
-      <!-- Premier choix : le dossier rempli en ligne -->
-      <details class="depliant depliant--principal" id="dossier">
-        <summary class="depliant__entete">
-          <span class="depliant__textes">
-            <span class="depliant__titre">Remplir mon dossier en ligne</span>
-            <span class="depliant__sous-titre">Fiche d'adhésion, autorisation parentale et règlement intérieur remplis automatiquement, en un seul PDF à imprimer.</span>
-          </span>
-          <span class="depliant__chevron" aria-hidden="true"></span>
-        </summary>
-        <div class="depliant__contenu">
-          <DossierInscription />
-        </div>
-      </details>
-
-      <!-- Second choix : les documents vierges -->
-      <details class="depliant depliant--secondaire" id="documents">
-        <summary class="depliant__entete">
-          <span class="depliant__textes">
-            <span class="depliant__titre">Vous préférez les remplir à la main ? {documents.titre}</span>
-          </span>
-          <span class="depliant__chevron" aria-hidden="true"></span>
-        </summary>
-        <div class="depliant__contenu">
+      <!-- Les deux façons de faire son dossier, présentées d'emblée -->
+      <div class="facons">
+        <a class="facon facon--en-ligne" href="#dossier">
+          <span class="facon__titre">En ligne</span>
+          <span class="facon__texte">Remplissez le formulaire ci-dessous : la fiche d'adhésion, l'autorisation parentale (mineurs) et le règlement intérieur sont remplis pour vous, en un seul PDF à imprimer.</span>
+          <span class="facon__action">Remplir le formulaire ↓</span>
+        </a>
+        <div class="facon" id="documents">
+          <span class="facon__titre">À la main</span>
+          <span class="facon__texte">Téléchargez les documents vierges, imprimez-les et remplissez-les :</span>
           <ul class="documents">
             {
               documents.documents.map((d) => (
                 <li>
                   <a href={d.fichier} download>
                     <span class="documents__nom">{d.titre}</span>
-                    <span class="documents__format">{format(d.fichier)} · Télécharger</span>
+                    <span class="documents__format">{format(d.fichier)} ↓</span>
                   </a>
                 </li>
               ))
             }
           </ul>
         </div>
-      </details>
+      </div>
+
+      <div class="dossier-en-ligne" id="dossier">
+        <h3 class="dossier-en-ligne__titre">Mon dossier en ligne</h3>
+        <DossierInscription />
+      </div>
     </div>
   </section>
 </Base>
@@ -138,55 +130,35 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
   .texte-long :global(li) { margin-bottom: 0.4em; }
   .inscription :global(p:first-child) { font-weight: 600; }
 
-  /* Dépliants : dossier en ligne (principal) et documents vierges (secondaire) */
-  .depliant { margin-top: 24px; border-radius: var(--rayon); }
-  .depliant__entete {
-    list-style: none;
-    cursor: pointer;
+  /* Les deux façons de faire son dossier */
+  .facons { display: grid; gap: 16px; margin-top: 32px; }
+  @media (min-width: 720px) { .facons { grid-template-columns: 1fr 1fr; } }
+  .facon {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px;
     border-radius: var(--rayon);
-  }
-  .depliant__entete::-webkit-details-marker { display: none; }
-  .depliant__textes { display: grid; gap: 4px; }
-  .depliant__chevron {
-    flex: none;
-    width: 14px;
-    height: 14px;
-    border-right: 3px solid currentColor;
-    border-bottom: 3px solid currentColor;
-    transform: rotate(45deg) translateY(-4px);
-    transition: transform 0.2s;
-  }
-  .depliant[open] .depliant__chevron { transform: rotate(-135deg) translateX(-4px); }
-  .depliant__contenu { padding-top: 20px; }
-
-  .depliant--principal { margin-top: 32px; }
-  .depliant--principal > .depliant__entete {
-    background: var(--rouge);
-    color: #fff;
-    padding: 20px 24px;
-  }
-  .depliant--principal > .depliant__entete:hover { background: var(--rouge-fonce); }
-  .depliant--principal .depliant__titre {
-    font-family: var(--titres);
-    font-size: clamp(1.4rem, 4vw, 1.9rem);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  .depliant--principal .depliant__sous-titre { font-size: 0.95rem; opacity: 0.92; }
-
-  .depliant--secondaire > .depliant__entete {
-    padding: 14px 18px;
     border: 1px solid var(--bord);
-    background: var(--panneau);
-    color: var(--texte-doux);
+    border-top: 4px solid var(--rouge);
+    background: var(--panneau-plein);
+    text-decoration: none;
+    color: var(--texte);
   }
-  .depliant--secondaire > .depliant__entete:hover { color: var(--texte); border-color: var(--texte-doux); }
-  .depliant--secondaire .depliant__titre { font-size: 0.98rem; }
-  .depliant--secondaire .depliant__chevron { width: 10px; height: 10px; border-width: 2px; }
+  .facon__titre { font-family: var(--titres); font-size: 1.6rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .facon__texte { color: var(--texte-doux); }
+  .facon__action {
+    margin-top: auto;
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rouge-texte);
+  }
+  .facon--en-ligne:hover { border-color: var(--rouge-texte); color: var(--texte); }
+  .facon--en-ligne:hover .facon__action { color: var(--texte); }
+
+  .dossier-en-ligne { margin-top: 48px; scroll-margin-top: 88px; }
+  .dossier-en-ligne__titre { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: 16px; }
   .documents { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .documents a {
     display: flex;
@@ -194,8 +166,8 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
     justify-content: space-between;
     align-items: center;
     gap: 4px 16px;
-    padding: 16px 20px;
-    background: var(--panneau-plein);
+    padding: 12px 16px;
+    background: #0b0b0b;
     border: 1px solid var(--bord);
     border-left: 4px solid var(--rouge);
     border-radius: var(--rayon);
@@ -205,16 +177,3 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
   .documents__nom { font-family: var(--titres); letter-spacing: 0.04em; font-size: 1.1rem; }
   .documents__format { color: var(--rouge-texte); font-size: 0.9rem; font-weight: 600; }
 </style>
-
-<script>
-  // Un lien vers /tarifs/#dossier ou #documents ouvre directement le bon dépliant.
-  const ouvrir = () => {
-    const cible = location.hash && document.querySelector<HTMLDetailsElement>(`details${location.hash}`);
-    if (cible) {
-      cible.open = true;
-      cible.scrollIntoView({ block: 'start' });
-    }
-  };
-  ouvrir();
-  window.addEventListener('hashchange', ouvrir);
-</script>

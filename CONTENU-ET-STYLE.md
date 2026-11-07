@@ -19,7 +19,8 @@ Règles éditoriales et visuelles de la refonte. Pour l'hébergement et la mise 
 | **L'équipe** | Histoire de Guillaume Kerner (« L'Ange Blond ») et fiches des coachs |
 | **Tarifs & inscription** | Grille tarifaire, pièces à fournir, fermetures, documents à télécharger, conditions du cours d'essai |
 
-- **Inscription** (page Tarifs & inscription, section `#inscription`) : en premier choix, un dépliant « Remplir mon dossier en ligne » (`#dossier`) qui génère le dossier en PDF à partir des documents originaux ; en second choix, un dépliant plus discret pour télécharger les documents vierges (`#documents`). Les textes d'aide du formulaire sont des textes d'interface, pas des textes de Guillaume.
+- **Inscription** (page Tarifs & inscription, section `#inscription`) : sous le texte de Guillaume, les deux façons de faire son dossier sont présentées côte à côte dès le départ : « En ligne » (le formulaire, affiché directement juste en dessous, `#dossier`) et « À la main » (les documents vierges à télécharger, `#documents`). Rien n'est caché dans un menu déroulant. Les textes d'aide du formulaire sont des textes d'interface, pas des textes de Guillaume.
+- **Accueil** : le bouton principal du haut de page est « S'inscrire en ligne » (vers `/tarifs/#dossier`), suivi de « Voir le planning » et « Cours d'essai ».
 - **Type d'abonnement par étapes** : catégorie (Adulte / Ados – Kids, pré-sélectionnée d'après la date de naissance), puis discipline (Muay Thai, MMA, les deux, ou 100 % féminin pour les adultes), puis durée (annuel ou semestre, adultes uniquement).
 - **Ordre des cours** : Muay Thai, MMA, Muay Thai kids / ados, Muay Thai féminin, chacun avec son icône (`src/components/IconeCours.astro`).
 - **Coachs sans photo ni présentation** (Jean, Phil) : la fiche affiche « Photo à venir » et « Présentation à venir » jusqu'à ce qu'on les complète dans `/admin`.

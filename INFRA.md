@@ -98,7 +98,7 @@ npm run build     # génère dist/ (c'est ce que fait Cloudflare Pages)
 
 ## Dossier d'inscription en ligne
 
-Le formulaire de la page Tarifs & inscription (composant `src/components/DossierInscription.astro`, ouvert directement par le lien `/tarifs/#dossier`) remplit les documents originaux (fiche d'adhésion, autorisation parentale pour les mineurs, règlement intérieur) et les rassemble en un seul PDF.
+Le formulaire de la page Tarifs & inscription (composant `src/components/DossierInscription.astro`, affiché directement, lien direct `/tarifs/#dossier`) remplit les documents originaux (fiche d'adhésion, autorisation parentale pour les mineurs, règlement intérieur) et les rassemble en un seul PDF.
 
 - **Tout se passe dans le navigateur** (bibliothèque `pdf-lib`, chargée uniquement au moment de générer le PDF). Aucune donnée n'est envoyée ni stockée : pas de serveur, pas de base de données, pas de question RGPD liée au stockage.
 - **Modèles utilisés** : `src/assets/modeles/` (copies figées des documents). Les documents téléchargeables de `public/documents/` (modifiables depuis `/admin`) en sont indépendants : remplacer un document dans l'admin ne casse pas le générateur.
