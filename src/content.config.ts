@@ -46,7 +46,7 @@ export const collections = {
       z.object({
         nom: z.string().min(1),
         ordre: z.number().int(),
-        photo: image(),
+        photo: image().optional(),
       }),
   }),
 

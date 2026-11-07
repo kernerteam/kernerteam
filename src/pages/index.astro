@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { typo } from '../lib/typo.mjs';
+import IconeCours from '../components/IconeCours.astro';
 import logo from '../assets/images/logo.png';
 import ordener1 from '../assets/images/ordener-1.jpg';
 import ordener2 from '../assets/images/ordener-2.jpg';
@@ -22,8 +23,8 @@ const essai = await texte('essai');
 
 const disciplines = await Promise.all(
   [
-    ['cours-mma', 'mma'],
     ['cours-muay-thai', 'muay-thai'],
+    ['cours-mma', 'mma'],
     ['cours-kids-ados', 'kids-ados'],
     ['cours-feminin', 'feminin'],
   ].map(async ([id, ancre]) => ({ ...(await texte(id)), ancre })),
@@ -63,6 +64,7 @@ const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
         {
           disciplines.map((d) => (
             <article class="carte">
+              <IconeCours type={d.ancre as any} class="carte__icone" />
               <h3>{d.titre}</h3>
               <div class="carte__extrait"><d.Contenu /></div>
               <a class="lien-fleche" href={`/cours/#${d.ancre}`}>
@@ -198,6 +200,7 @@ const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
   .grille--atouts :global(.carte) { background: var(--panneau-plein); }
   .grille--atouts h3 { font-size: 1.25rem; }
 
+  .carte :global(.carte__icone) { color: var(--rouge-texte); width: 44px; height: 44px; }
   .carte__extrait {
     color: var(--texte-doux);
     display: -webkit-box;

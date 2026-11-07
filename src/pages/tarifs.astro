@@ -1,6 +1,7 @@
 ---
 import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import DossierInscription from '../components/DossierInscription.astro';
 import { typo } from '../lib/typo.mjs';
 
 const tarifs = (await getEntry('tarifs', 'tarifs'))!.data;
@@ -53,25 +54,43 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
       <h2 class="titre-section">{inscription.data.titre}</h2>
       <div class="texte-long inscription"><Inscription /></div>
 
-      <div class="en-ligne">
-        <h3 class="en-ligne__titre">Remplir le dossier en ligne</h3>
-        <p>Fiche d'adhésion, autorisation parentale et règlement intérieur remplis automatiquement, en un seul PDF à imprimer.</p>
-        <a class="bouton" href="/inscription/">Remplir mon dossier</a>
-      </div>
+      <!-- Premier choix : le dossier rempli en ligne -->
+      <details class="depliant depliant--principal" id="dossier">
+        <summary class="depliant__entete">
+          <span class="depliant__textes">
+            <span class="depliant__titre">Remplir mon dossier en ligne</span>
+            <span class="depliant__sous-titre">Fiche d'adhésion, autorisation parentale et règlement intérieur remplis automatiquement, en un seul PDF à imprimer.</span>
+          </span>
+          <span class="depliant__chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="depliant__contenu">
+          <DossierInscription />
+        </div>
+      </details>
 
-      <h3 class="documents__titre">{documents.titre}</h3>
-      <ul class="documents">
-        {
-          documents.documents.map((d) => (
-            <li>
-              <a href={d.fichier} download>
-                <span class="documents__nom">{d.titre}</span>
-                <span class="documents__format">{format(d.fichier)} · Télécharger</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      <!-- Second choix : les documents vierges -->
+      <details class="depliant depliant--secondaire" id="documents">
+        <summary class="depliant__entete">
+          <span class="depliant__textes">
+            <span class="depliant__titre">Vous préférez les remplir à la main ? {documents.titre}</span>
+          </span>
+          <span class="depliant__chevron" aria-hidden="true"></span>
+        </summary>
+        <div class="depliant__contenu">
+          <ul class="documents">
+            {
+              documents.documents.map((d) => (
+                <li>
+                  <a href={d.fichier} download>
+                    <span class="documents__nom">{d.titre}</span>
+                    <span class="documents__format">{format(d.fichier)} · Télécharger</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </details>
     </div>
   </section>
 </Base>
@@ -119,16 +138,55 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
   .texte-long :global(li) { margin-bottom: 0.4em; }
   .inscription :global(p:first-child) { font-weight: 600; }
 
-  .en-ligne {
-    margin-top: 32px;
-    padding: 24px;
-    background: var(--panneau-plein);
-    border: 1px solid var(--rouge);
+  /* Dépliants : dossier en ligne (principal) et documents vierges (secondaire) */
+  .depliant { margin-top: 24px; border-radius: var(--rayon); }
+  .depliant__entete {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     border-radius: var(--rayon);
   }
-  .en-ligne__titre { font-size: 1.5rem; margin-bottom: 0.4em; }
-  .en-ligne p { color: var(--texte-doux); }
-  .documents__titre { margin-top: 40px; font-size: 1.4rem; }
+  .depliant__entete::-webkit-details-marker { display: none; }
+  .depliant__textes { display: grid; gap: 4px; }
+  .depliant__chevron {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-right: 3px solid currentColor;
+    border-bottom: 3px solid currentColor;
+    transform: rotate(45deg) translateY(-4px);
+    transition: transform 0.2s;
+  }
+  .depliant[open] .depliant__chevron { transform: rotate(-135deg) translateX(-4px); }
+  .depliant__contenu { padding-top: 20px; }
+
+  .depliant--principal { margin-top: 32px; }
+  .depliant--principal > .depliant__entete {
+    background: var(--rouge);
+    color: #fff;
+    padding: 20px 24px;
+  }
+  .depliant--principal > .depliant__entete:hover { background: var(--rouge-fonce); }
+  .depliant--principal .depliant__titre {
+    font-family: var(--titres);
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .depliant--principal .depliant__sous-titre { font-size: 0.95rem; opacity: 0.92; }
+
+  .depliant--secondaire > .depliant__entete {
+    padding: 14px 18px;
+    border: 1px solid var(--bord);
+    background: var(--panneau);
+    color: var(--texte-doux);
+  }
+  .depliant--secondaire > .depliant__entete:hover { color: var(--texte); border-color: var(--texte-doux); }
+  .depliant--secondaire .depliant__titre { font-size: 0.98rem; }
+  .depliant--secondaire .depliant__chevron { width: 10px; height: 10px; border-width: 2px; }
   .documents { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .documents a {
     display: flex;
@@ -147,3 +205,16 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
   .documents__nom { font-family: var(--titres); letter-spacing: 0.04em; font-size: 1.1rem; }
   .documents__format { color: var(--rouge-texte); font-size: 0.9rem; font-weight: 600; }
 </style>
+
+<script>
+  // Un lien vers /tarifs/#dossier ou #documents ouvre directement le bon dépliant.
+  const ouvrir = () => {
+    const cible = location.hash && document.querySelector<HTMLDetailsElement>(`details${location.hash}`);
+    if (cible) {
+      cible.open = true;
+      cible.scrollIntoView({ block: 'start' });
+    }
+  };
+  ouvrir();
+  window.addEventListener('hashchange', ouvrir);
+</script>

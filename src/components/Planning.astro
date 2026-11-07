@@ -101,29 +101,27 @@ const attributsCours = (c: (typeof cours)[number]) => ({
 ---
 
 <div class="planning" data-planning>
-  <form class="planning__filtres" data-filtres hidden aria-label="Filtrer le planning">
-    {
-      filtres.map((f) => (
-        <fieldset class="filtre">
-          <legend class="filtre__legende">{f.legende}</legend>
-          <div class="filtre__options">
-            {f.options.map(([valeur, libelle], i) => (
-              <label class="puce">
-                <input type="radio" name={f.nom} value={valeur} checked={i === 0} />
-                <span>{libelle}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-      ))
-    }
-    <p class="planning__compte" aria-live="polite" data-compte></p>
-  </form>
-
-  <ul class="planning__legende" aria-label="Légende des salles">
-    <li><span class="pastille pastille--ordener" aria-hidden="true"></span>{site.salles.ordener.nom} · {site.salles.ordener.adresse}</li>
-    <li><span class="pastille pastille--ney" aria-hidden="true"></span>{site.salles.ney.nom} · {site.salles.ney.adresse}</li>
-  </ul>
+  <div class="planning__barre">
+    <form class="planning__filtres" data-filtres hidden aria-label="Filtrer le planning">
+      {
+        filtres.map((f) => (
+          <label class="filtre">
+            <span class="filtre__libelle">{f.legende}</span>
+            <select name={f.nom}>
+              {f.options.map(([valeur, libelle]) => (
+                <option value={valeur}>{libelle}</option>
+              ))}
+            </select>
+          </label>
+        ))
+      }
+      <p class="planning__compte" aria-live="polite" data-compte></p>
+    </form>
+    <ul class="planning__legende" aria-label="Légende des salles">
+      <li><span class="pastille pastille--ordener" aria-hidden="true"></span>{site.salles.ordener.nom}</li>
+      <li><span class="pastille pastille--ney" aria-hidden="true"></span>{site.salles.ney.nom}</li>
+    </ul>
+  </div>
 
   <!-- Grand écran : calendrier -->
   <div class="calendrier" style={`--unites: ${totalUnites}; --jours: ${jours.length}`}>
@@ -217,54 +215,62 @@ const attributsCours = (c: (typeof cours)[number]) => ({
 
 <style>
   /* ---------- Filtres et légende ---------- */
-  .planning__filtres {
-    display: grid;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding: 16px;
+  /* Barre compacte : filtres à gauche, légende des salles à droite */
+  .planning__barre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-bottom: 16px;
+    padding: 12px 14px;
     background: var(--panneau);
     border: 1px solid var(--bord);
     border-radius: var(--rayon);
   }
-  .filtre { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-  .filtre__legende {
-    float: left;
-    min-width: 6.5em;
+  .planning__filtres { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+  .filtre { display: grid; gap: 4px; flex: 1 1 140px; min-width: 0; }
+  .filtre__libelle {
     font-family: var(--titres);
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--texte-doux);
-    padding: 0;
   }
-  .filtre__options { display: flex; flex-wrap: wrap; gap: 8px; }
-  .puce { position: relative; cursor: pointer; }
-  .puce input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-  .puce span {
-    display: inline-block;
-    padding: 6px 14px;
-    min-height: 36px;
-    border: 1px solid var(--bord);
-    border-radius: 999px;
+  .filtre select {
+    font: inherit;
     font-size: 0.95rem;
-    line-height: 1.5;
-    background: rgb(255 255 255 / 0.03);
+    color: var(--texte);
+    background-color: #0b0b0b;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    border-radius: var(--rayon);
+    padding: 7px 34px 7px 10px;
+    min-height: 40px;
+    width: 100%;
+    color-scheme: dark;
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--texte-doux) 50%), linear-gradient(135deg, var(--texte-doux) 50%, transparent 50%);
+    background-position: right 16px center, right 11px center;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
   }
-  .puce input:checked + span { background: var(--rouge); border-color: var(--rouge); color: #fff; }
-  .puce input:focus-visible + span { outline: 3px solid var(--rouge-texte); outline-offset: 2px; }
-  .planning__compte { margin: 0; color: var(--texte-doux); font-size: 0.95rem; }
+  .filtre select:focus-visible { outline: 3px solid var(--rouge-texte); outline-offset: 1px; }
+  .planning__compte { margin: 0; color: var(--texte-doux); font-size: 0.85rem; align-self: center; flex-basis: 100%; }
+  @media (min-width: 760px) { .planning__compte { flex-basis: auto; } }
 
   .planning__legende {
     list-style: none;
-    margin: 0 0 16px;
+    margin: 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 24px;
+    gap: 6px 16px;
     color: var(--texte-doux);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
   }
   .planning__legende li { display: flex; align-items: center; gap: 8px; }
-  .pastille { width: 18px; height: 18px; border-radius: 3px; display: inline-block; }
+  .pastille { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
   .pastille--ordener { background: var(--panneau-plein); border: 2px solid var(--texte); }
   .pastille--ney { background: var(--rouge); border: 2px solid var(--rouge); }
 
@@ -466,8 +472,8 @@ const attributsCours = (c: (typeof cours)[number]) => ({
     for (const nom of Object.keys(PAR_DEFAUT)) {
       const valeur = params.get(nom);
       if (!valeur) continue;
-      const option = [...formulaire.querySelectorAll<HTMLInputElement>(`input[name="${nom}"]`)].find((i) => i.value === valeur);
-      if (option) option.checked = true;
+      const liste = formulaire.elements.namedItem(nom) as HTMLSelectElement;
+      if ([...liste.options].some((o) => o.value === valeur)) liste.value = valeur;
     }
 
     const correspond = (cours: HTMLElement, choix: Record<string, string>) =>
@@ -498,7 +504,7 @@ const attributsCours = (c: (typeof cours)[number]) => ({
         total += visibles;
       });
 
-      compte.textContent = `${total} cours ${total > 1 ? 'affichés' : 'affiché'} sur la semaine`;
+      compte.textContent = `${total} cours ${total > 1 ? 'affichés' : 'affiché'}`;
 
       const url = new URL(location.href);
       for (const [nom, defaut] of Object.entries(PAR_DEFAUT)) {

@@ -116,9 +116,10 @@ collections:
         min: 1
       - name: photo
         label: Photo
-        hint: Portrait individuel uniquement (pas de photo de groupe).
+        hint: Portrait individuel uniquement (pas de photo de groupe). Sans photo, « Photo à venir » s'affiche.
         widget: image
-      - { name: body, label: Présentation, widget: markdown, buttons: [bold, italic, link] }
+        required: false
+      - { name: body, label: Présentation, widget: markdown, buttons: [bold, italic, link], required: false, hint: "Sans texte, « Présentation à venir » s'affiche." }
 
   # ---------------------------------------------------------------- Textes
   - name: textes

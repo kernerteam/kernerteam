@@ -2,11 +2,12 @@
 import { getEntry, render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Planning from '../components/Planning.astro';
+import IconeCours from '../components/IconeCours.astro';
 
 const cours = await Promise.all(
   [
-    ['cours-mma', 'mma'],
     ['cours-muay-thai', 'muay-thai'],
+    ['cours-mma', 'mma'],
     ['cours-kids-ados', 'kids-ados'],
     ['cours-feminin', 'feminin'],
   ].map(async ([id, ancre]) => {
@@ -24,7 +25,7 @@ const cours = await Promise.all(
         {
           cours.map((c) => (
             <article class="carte" id={c.ancre}>
-              <h2>{c.titre}</h2>
+              <h2 class="cours-titre"><IconeCours type={c.ancre as any} />{c.titre}</h2>
               <div><c.Contenu /></div>
             </article>
           ))
@@ -32,7 +33,7 @@ const cours = await Promise.all(
       </div>
       <div class="boutons cours-actions">
         <a class="bouton" href="/tarifs/">Tarifs</a>
-        <a class="bouton bouton--contour" href="/inscription/">S'inscrire</a>
+        <a class="bouton bouton--contour" href="/tarifs/#dossier">S'inscrire</a>
       </div>
     </div>
   </section>
@@ -49,6 +50,8 @@ const cours = await Promise.all(
   .cours-liste { display: grid; gap: 16px; margin-top: 32px; }
   @media (min-width: 760px) { .cours-liste { grid-template-columns: 1fr 1fr; } }
   .cours-liste h2 { font-size: 1.75rem; margin: 0; }
+  .cours-titre { display: flex; align-items: center; gap: 14px; }
+  .cours-titre :global(.icone-cours) { color: var(--rouge-texte); flex: none; }
   .cours-liste :global(p) { color: var(--texte-doux); }
   .cours-actions { margin-top: 32px; }
 </style>

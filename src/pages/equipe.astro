@@ -12,7 +12,7 @@ const { Content: Histoire } = await render(guillaume);
 const coachs = await Promise.all(
   (await getCollection('coachs'))
     .sort((a, b) => a.data.ordre - b.data.ordre)
-    .map(async (c) => ({ ...c.data, id: c.id, Bio: (await render(c)).Content })),
+    .map(async (c) => ({ ...c.data, id: c.id, aUneBio: Boolean(c.body?.trim()), Bio: (await render(c)).Content })),
 );
 ---
 
@@ -43,10 +43,14 @@ const coachs = await Promise.all(
         {
           coachs.map((c) => (
             <article class="coach" id={c.id}>
-              <Image src={c.photo} alt={`Portrait de ${c.nom.toLowerCase().replace(/(^|\s)\S/g, (l) => l.toUpperCase())}`} widths={[300, 480, 640]} sizes="(min-width: 1100px) 360px, (min-width: 640px) 50vw, 100vw" class="coach__photo" />
+              {c.photo ? (
+                <Image src={c.photo} alt={`Portrait de ${c.nom.toLowerCase().replace(/(^|\s)\S/g, (l) => l.toUpperCase())}`} widths={[300, 480, 640]} sizes="(min-width: 1100px) 360px, (min-width: 640px) 50vw, 100vw" class="coach__photo" />
+              ) : (
+                <div class="coach__photo coach__photo--attente"><span>Photo à venir</span></div>
+              )}
               <div class="coach__texte">
                 <h3>{c.nom}</h3>
-                <c.Bio />
+                {c.aUneBio ? <c.Bio /> : <p class="coach__attente">Présentation à venir.</p>}
               </div>
             </article>
           ))
@@ -91,6 +95,16 @@ const coachs = await Promise.all(
     overflow: hidden;
   }
   .coach__photo { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 20%; filter: grayscale(0.15); }
+  .coach__photo--attente {
+    display: grid;
+    place-items: center;
+    background: repeating-linear-gradient(-45deg, #161616 0 14px, #1c1c1c 14px 28px);
+    color: var(--texte-doux);
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .coach__texte .coach__attente { font-style: italic; }
   .coach__texte { padding: 20px 22px 24px; border-top: 4px solid var(--rouge); }
   .coach__texte h3 { font-size: 1.6rem; margin-bottom: 0.4em; }
   .coach__texte :global(p) { color: var(--texte-doux); font-size: 1rem; }
