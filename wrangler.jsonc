@@ -1,0 +1,19 @@
+// Hébergement Cloudflare : Worker « kernerteam » du compte Cloudflare « Kerner Team ».
+// - Le site (dist/, généré par npm run build) est servi en fichiers statiques.
+// - Seules les adresses /auth et /callback passent par auth/index.js (connexion GitHub de /admin).
+// Les secrets GITHUB_CLIENT_ID et GITHUB_CLIENT_SECRET se règlent dans le tableau de bord
+// Cloudflare (Worker kernerteam → Settings → Variables and Secrets), jamais dans ce fichier.
+{
+  "name": "kernerteam",
+  "main": "auth/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/auth", "/callback"]
+  },
+  "vars": {
+    // Sites autorisés à utiliser la connexion (séparés par des virgules).
+    "ALLOWED_DOMAINS": "kernerteam.kerner-team.workers.dev, kernerteam.net, www.kernerteam.net"
+  }
+}
