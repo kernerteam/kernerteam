@@ -1,0 +1,40 @@
+# Planning des cours. Modifiable depuis /admin → Planning.
+# jour : lundi … dimanche · debut/fin : HH:MM · salle : ordener | ney
+# disciplines : muay-thai et/ou mma · public : adultes | ados | kids | feminin
+cours:
+  # Lundi
+  - { jour: lundi, debut: "07:00", fin: "08:00", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  - { jour: lundi, debut: "12:00", fin: "13:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: lundi, debut: "12:30", fin: "13:30", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: lundi, debut: "19:00", fin: "20:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  - { jour: lundi, debut: "20:30", fin: "22:00", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  # Mardi
+  - { jour: mardi, debut: "12:00", fin: "13:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: mardi, debut: "12:30", fin: "13:30", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: mardi, debut: "17:00", fin: "18:00", intitule: MUAY THAI KIDS, disciplines: [muay-thai], public: kids, salle: ordener }
+  - { jour: mardi, debut: "18:00", fin: "19:00", intitule: MUAY THAI ADOS, disciplines: [muay-thai], public: ados, salle: ordener }
+  - { jour: mardi, debut: "19:00", fin: "20:30", intitule: STRIKING MUAY THAI - MMA, disciplines: [muay-thai, mma], public: adultes, salle: ordener }
+  # Mercredi
+  - { jour: mercredi, debut: "07:00", fin: "08:00", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  - { jour: mercredi, debut: "12:00", fin: "13:15", intitule: MUAY THAI 100 % FÉMININ, disciplines: [muay-thai], public: feminin, salle: ordener }
+  - { jour: mercredi, debut: "12:00", fin: "13:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: mercredi, debut: "14:00", fin: "15:00", intitule: MUAY THAI KIDS, disciplines: [muay-thai], public: kids, salle: ney }
+  - { jour: mercredi, debut: "15:00", fin: "16:00", intitule: MUAY THAI ADOS, disciplines: [muay-thai], public: ados, salle: ney }
+  - { jour: mercredi, debut: "19:00", fin: "20:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  - { jour: mercredi, debut: "20:30", fin: "22:00", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  # Jeudi
+  - { jour: jeudi, debut: "12:00", fin: "13:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: jeudi, debut: "12:30", fin: "13:30", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: jeudi, debut: "18:00", fin: "19:00", intitule: MUAY THAI ADOS, disciplines: [muay-thai], public: ados, salle: ordener }
+  - { jour: jeudi, debut: "19:00", fin: "20:30", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  - { jour: jeudi, debut: "20:30", fin: "22:00", intitule: GRAPPLING / MMA, disciplines: [mma], public: adultes, salle: ordener }
+  # Vendredi
+  - { jour: vendredi, debut: "12:00", fin: "13:30", intitule: FIGHT CLUB MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: vendredi, debut: "12:30", fin: "13:30", intitule: FIGHT CLUB MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: vendredi, debut: "19:00", fin: "20:30", intitule: FIGHT CLUB MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ordener }
+  # Samedi
+  - { jour: samedi, debut: "10:00", fin: "11:15", intitule: MUAY THAI 100 % FÉMININ, disciplines: [muay-thai], public: feminin, salle: ordener }
+  - { jour: samedi, debut: "13:00", fin: "14:30", intitule: MMA, disciplines: [mma], public: adultes, salle: ordener }
+  - { jour: samedi, debut: "13:30", fin: "15:00", intitule: MUAY THAI, disciplines: [muay-thai], public: adultes, salle: ney }
+  - { jour: samedi, debut: "15:30", fin: "16:30", intitule: MUAY THAI KIDS, disciplines: [muay-thai], public: kids, salle: ney }
+  - { jour: samedi, debut: "16:30", fin: "17:30", intitule: MUAY THAI ADOS, disciplines: [muay-thai], public: ados, salle: ney }

@@ -1,0 +1,20 @@
+{
+  "name": "kernerteam",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.6",
+    "@fontsource-variable/work-sans": "^5.3.0",
+    "@fontsource/fjalla-one": "^5.3.0",
+    "astro": "^7.4.7",
+    "yaml": "^2.9.1"
+  },
+  "engines": {
+    "node": ">=22.23.4"
+  }
+}

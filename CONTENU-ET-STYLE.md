@@ -73,7 +73,7 @@ La première version sert de maquette à montrer à Guillaume, sans engagement. 
 ## Identité visuelle
 
 - **Couleurs** : noir et rouge, tirées du logo KT. Le texte est clair sur fond sombre.
-- **Fond d'écran** : `background.png`, deux coqs de combat et des motifs végétaux en rouge sombre, sur fond transparent.
+- **Fond d'écran** : `src/assets/images/background.png`, deux coqs de combat et des motifs végétaux en rouge sombre, sur fond transparent.
   - Il est placé en arrière-plan fixe, derrière le contenu, sur fond noir.
   - On l'atténue (opacité réduite ou voile sombre) pour que le texte reste lisible partout, avec un contraste minimum WCAG AA (4,5:1 pour le texte courant).
   - L'image est compressée pour le web : l'original fait 1,1 Mo en PNG, l'objectif est une version WebP bien plus légère.
@@ -110,13 +110,21 @@ La première version sert de maquette à montrer à Guillaume, sans engagement. 
 | AOUT | AOÛT | Inscription |
 | FICHE D'ADHESION | FICHE D'ADHÉSION | Inscription |
 | REGLEMENT INTERIEUR | RÈGLEMENT INTÉRIEUR | Inscription |
-| Kerner Team: Training Fees for MMA & Muay Thai Classes (titre de page) | Tarifs – Kerner Team | Tarifs |
+| Kerner Team: Training Fees for MMA & Muay Thai Classes (titre de page) | Tarifs & inscription – Kerner Team | Tarifs |
+| bien être | bien-être | À propos |
+| FEMININ (titres) | FÉMININ | Type de cours, Tarifs, planning |
+| Points finaux manquants (« …adultes et ados . », « …à votre rythme », « …pieds-poings ») | Point ajouté ou espace retirée | Accueil, Type de cours |
+| Guillemets droits autour de "Ange Blond" dans l'accroche | « Ange Blond » | Accueil |
 
 ### Bugs de mise en page (disparaissent avec la refonte)
 
 - Les adresses en double sur l'accueil (bd Ney ×5, Ordener ×1).
 - Le nom « Alison Sidharta » répété sous les fiches de Khavaj et de Julien.
 - Le titre « MUAY THAI KIDS / ADOS » placé au-dessus du texte du cours 100 % féminin.
+
+### Typographie automatique
+
+Les espaces insécables du français (avant `? ! ; :`, à l'intérieur des « guillemets », avant `€` et `%`) sont ajoutées automatiquement à l'affichage par `src/lib/typo.mjs`. Inutile de les saisir dans `/admin`.
 - Les sections vides de l'accueil (« Notre équipe », « Planning »).
 
 ### Corrections à valider par Guillaume

@@ -1,0 +1,33 @@
+formules:
+  - titre: 1 DISCIPLINE
+    detail: MMA / MUAY THAI
+    prix:
+      - { libelle: ANNÉE, montant: 550 }
+      - { libelle: SEMESTRE, montant: 430 }
+      - { libelle: SÉANCE D'ESSAI, montant: 20 }
+  - titre: 2 DISCIPLINES
+    detail: MMA + MUAY THAI
+    prix:
+      - { libelle: ANNÉE, montant: 670 }
+      - { libelle: SEMESTRE, montant: 530 }
+      - { libelle: SÉANCE D'ESSAI, montant: 20 }
+  - titre: -18 1 DISCIPLINE (ADOS + KIDS)
+    detail: MMA / MUAY THAI
+    prix:
+      - { libelle: ANNÉE, montant: 410 }
+      - { libelle: SÉANCE D'ESSAI, montant: 20 }
+  - titre: -18 2 DISCIPLINES (ADOS + KIDS)
+    detail: MMA + MUAY THAI
+    prix:
+      - { libelle: ANNÉE, montant: 510 }
+      - { libelle: SÉANCE D'ESSAI, montant: 20 }
+  - titre: COURS 100% FÉMININ
+    detail: MUAY THAI
+    prix:
+      - { libelle: ANNÉE, montant: 410 }
+      - { libelle: SÉANCE D'ESSAI, montant: 20 }
+  - titre: LEÇON PRIVÉE
+    detail: MMA + MUAY THAI
+    prix:
+      - { libelle: SÉANCE, montant: 60 }
+paiement: NOUS ACCEPTONS UNIQUEMENT LES ESPÈCES ET LES CHÈQUES

@@ -1,0 +1,54 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Planning from '../components/Planning.astro';
+
+const cours = await Promise.all(
+  [
+    ['cours-mma', 'mma'],
+    ['cours-muay-thai', 'muay-thai'],
+    ['cours-kids-ados', 'kids-ados'],
+    ['cours-feminin', 'feminin'],
+  ].map(async ([id, ancre]) => {
+    const entree = (await getEntry('textes', id))!;
+    return { ...entree.data, ancre, Contenu: (await render(entree)).Content };
+  }),
+);
+---
+
+<Base titre="Cours & planning" description="Les cours de la Kerner Team (MMA, Muay Thai, kids, ados, 100 % féminin) et le planning de la semaine dans nos deux salles du 18e arrondissement.">
+  <section class="section">
+    <div class="conteneur">
+      <h1 class="titre-page">COURS</h1>
+      <div class="cours-liste">
+        {
+          cours.map((c) => (
+            <article class="carte" id={c.ancre}>
+              <h2>{c.titre}</h2>
+              <div><c.Contenu /></div>
+            </article>
+          ))
+        }
+      </div>
+      <div class="boutons cours-actions">
+        <a class="bouton" href="/tarifs/">Tarifs</a>
+        <a class="bouton bouton--contour" href="/tarifs/#inscription">S'inscrire</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panneau" id="planning">
+    <div class="conteneur">
+      <h2 class="titre-section">PLANNING</h2>
+      <Planning />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .cours-liste { display: grid; gap: 16px; margin-top: 32px; }
+  @media (min-width: 760px) { .cours-liste { grid-template-columns: 1fr 1fr; } }
+  .cours-liste h2 { font-size: 1.75rem; margin: 0; }
+  .cours-liste :global(p) { color: var(--texte-doux); }
+  .cours-actions { margin-top: 32px; }
+</style>

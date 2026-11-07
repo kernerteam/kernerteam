@@ -1,0 +1,265 @@
+---
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { typo } from '../lib/typo.mjs';
+import logo from '../assets/images/logo.png';
+import ordener1 from '../assets/images/ordener-1.jpg';
+import ordener2 from '../assets/images/ordener-2.jpg';
+import ordener3 from '../assets/images/ordener-3.jpg';
+
+const site = (await getEntry('site', 'site'))!.data;
+const accueil = (await getEntry('accueil', 'accueil'))!.data;
+const faq = (await getEntry('faq', 'faq'))!.data;
+
+const texte = async (id: string) => {
+  const entree = (await getEntry('textes', id))!;
+  return { ...entree.data, Contenu: (await render(entree)).Content };
+};
+const intro = await texte('accueil-intro');
+const champion = await texte('champion');
+const essai = await texte('essai');
+
+const disciplines = await Promise.all(
+  [
+    ['cours-mma', 'mma'],
+    ['cours-muay-thai', 'muay-thai'],
+    ['cours-kids-ados', 'kids-ados'],
+    ['cours-feminin', 'feminin'],
+  ].map(async ([id, ancre]) => ({ ...(await texte(id)), ancre })),
+);
+
+const itineraire = (s: { adresse: string; code_postal_ville: string }) =>
+  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${s.adresse}, ${s.code_postal_ville}`)}`;
+---
+
+<Base>
+  <section class="hero">
+    <div class="conteneur hero__contenu">
+      <Image src={logo} alt="" height={150} class="hero__logo" loading="eager" />
+      <h1 class="hero__titre">KERNER TEAM</h1>
+      <p class="hero__accroche">{typo(site.accroche)}</p>
+      <div class="boutons hero__boutons">
+        <a class="bouton" href="/cours/#planning">Voir le planning</a>
+        <a class="bouton bouton--contour" href="/tarifs/#essai">Cours d'essai</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panneau" id="ecole">
+    <div class="conteneur deux-colonnes">
+      <div>
+        <h2 class="titre-section">{intro.titre}</h2>
+        <div class="texte-long"><intro.Contenu /></div>
+      </div>
+      <Image src={ordener2} alt="La salle de la rue Ordener : tatamis noirs au sol et aux murs, logos Kerner Team" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="photo" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="conteneur">
+      <h2 class="titre-section">Nos cours</h2>
+      <div class="grille">
+        {
+          disciplines.map((d) => (
+            <article class="carte">
+              <h3>{d.titre}</h3>
+              <div class="carte__extrait"><d.Contenu /></div>
+              <a class="lien-fleche" href={`/cours/#${d.ancre}`}>
+                Voir le cours<span class="visuellement-cache"> {d.titre}</span>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panneau">
+    <div class="conteneur champion">
+      <div>
+        <h2 class="titre-section">{champion.titre}</h2>
+        <div class="texte-long"><champion.Contenu /></div>
+      </div>
+      <div>
+        <h2 class="titre-section">{typo(accueil.titre_atouts)}</h2>
+        <div class="grille grille--atouts">
+        {
+          accueil.atouts.map((a) => (
+            <article class="carte">
+              <h3>{typo(a.titre)}</h3>
+              <p>{typo(a.texte)}</p>
+              <a class="lien-fleche" href={a.lien}>{a.lien_libelle}</a>
+            </article>
+          ))
+        }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panneau" id="salles">
+    <div class="conteneur">
+      <h2 class="titre-section">{accueil.titre_salles}</h2>
+      <div class="salles">
+        <article class="salle">
+          <div class="salle__photos">
+            <Image src={ordener1} alt="Salle de la rue Ordener : espace d'entraînement avec sacs de frappe et baies vitrées" widths={[480, 800, 1024]} sizes="(min-width: 900px) 50vw, 100vw" class="salle__photo-principale" />
+            <Image src={ordener2} alt="Salle de la rue Ordener : tatamis et protections murales aux logos KT" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
+            <Image src={ordener3} alt="Salle de la rue Ordener : cage et sacs de frappe" widths={[320, 480]} sizes="(min-width: 900px) 25vw, 50vw" />
+          </div>
+          <div class="salle__infos">
+            <h3>{site.salles.ordener.nom}</h3>
+            <p>{site.salles.ordener.adresse}, {site.salles.ordener.code_postal_ville}</p>
+            <div class="boutons">
+              <a class="lien-fleche" href="/cours/?salle=ordener#planning">Les cours de cette salle</a>
+              <a class="lien-fleche" href={itineraire(site.salles.ordener)} target="_blank" rel="noopener">Itinéraire<span class="visuellement-cache"> (nouvel onglet)</span></a>
+            </div>
+          </div>
+        </article>
+
+        <article class="salle">
+          <div class="salle__photos salle__photos--attente">
+            <p>Photo à venir</p>
+          </div>
+          <div class="salle__infos">
+            <h3>{site.salles.ney.nom}</h3>
+            <p>{site.salles.ney.adresse}, {site.salles.ney.code_postal_ville}</p>
+            <div class="boutons">
+              <a class="lien-fleche" href="/cours/?salle=ney#planning">Les cours de cette salle</a>
+              <a class="lien-fleche" href={itineraire(site.salles.ney)} target="_blank" rel="noopener">Itinéraire<span class="visuellement-cache"> (nouvel onglet)</span></a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="conteneur conteneur--etroit">
+      <h2 class="titre-section">FAQ</h2>
+      <p class="faq__intro">
+        Veuillez nous joindre à l'adresse <a href={`mailto:${site.email}`}>{site.email}</a> si vous ne trouvez pas de réponse à votre question.
+      </p>
+      <div class="faq">
+        {
+          faq.questions.map((q) => (
+            <details class="faq__item">
+              <summary>{typo(q.question)}</summary>
+              <p>{typo(q.reponse)}</p>
+            </details>
+          ))
+        }
+        <details class="faq__item">
+          <summary>{typo(essai.titre)}</summary>
+          <div><essai.Contenu /></div>
+        </details>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    min-height: min(78vh, 760px);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding-block: 64px;
+  }
+  .hero__contenu { display: flex; flex-direction: column; align-items: center; }
+  .hero__logo { width: auto; height: clamp(104px, 18vw, 150px); }
+  .hero__titre {
+    font-size: clamp(3.4rem, 13vw, 8rem);
+    letter-spacing: 0.04em;
+    margin: 12px 0 8px;
+    text-shadow: 0 4px 30px rgb(0 0 0 / 0.8);
+  }
+  .hero__accroche {
+    max-width: 40ch;
+    font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+    text-shadow: 0 2px 16px rgb(0 0 0 / 0.9);
+    margin-bottom: 28px;
+  }
+  .hero__boutons { justify-content: center; }
+
+  .deux-colonnes { display: grid; gap: 32px; align-items: center; }
+  @media (min-width: 900px) {
+    .deux-colonnes { grid-template-columns: 1fr 1fr; gap: 56px; }
+    .deux-colonnes--inverse > :first-child { order: 2; }
+  }
+  .photo { width: 100%; border-radius: var(--rayon); border: 1px solid var(--bord); }
+
+  .champion { display: grid; gap: 48px; }
+  @media (min-width: 1000px) {
+    .champion { grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  }
+  .grille--atouts { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+  .grille--atouts :global(.carte) { background: var(--panneau-plein); }
+  .grille--atouts h3 { font-size: 1.25rem; }
+
+  .carte__extrait {
+    color: var(--texte-doux);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .salles { display: grid; gap: 24px; }
+  @media (min-width: 900px) { .salles { grid-template-columns: 1fr 1fr; } }
+  .salle {
+    background: var(--panneau-plein);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .salle__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .salle__photos :global(img) { width: 100%; height: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .salle__photos :global(.salle__photo-principale) { grid-column: 1 / -1; }
+  .salle__photos--attente {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 16 / 13.5;
+    background: repeating-linear-gradient(-45deg, #161616 0 14px, #1c1c1c 14px 28px);
+    color: var(--texte-doux);
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .salle__infos { padding: 24px; display: grid; gap: 8px; }
+  .salle__infos h3 { font-size: 1.6rem; margin: 0; }
+  .salle__infos p { color: var(--texte-doux); margin: 0; }
+  .salle__infos .boutons { gap: 8px 24px; margin-top: 8px; }
+
+  .conteneur--etroit { max-width: calc(820px + 2 * var(--gouttiere)); }
+  .faq__intro { color: var(--texte-doux); }
+  .faq { display: grid; gap: 8px; margin-top: 24px; }
+  .faq__item {
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+  }
+  .faq__item summary {
+    cursor: pointer;
+    padding: 16px 48px 16px 20px;
+    font-weight: 600;
+    position: relative;
+    list-style: none;
+  }
+  .faq__item summary::-webkit-details-marker { display: none; }
+  .faq__item summary::after {
+    content: '+';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--rouge-texte);
+  }
+  .faq__item[open] summary::after { content: '−'; }
+  .faq__item > :not(summary) { padding: 0 20px 18px; color: var(--texte-doux); }
+  .faq__item :global(ul) { margin: 0.5em 0 0; padding-left: 1.2em; }
+</style>

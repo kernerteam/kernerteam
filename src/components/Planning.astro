@@ -1,0 +1,245 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { JOURS } from '../content.config';
+import { typo } from '../lib/typo.mjs';
+
+const LIBELLES_JOURS: Record<(typeof JOURS)[number], string> = {
+  lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi',
+  vendredi: 'Vendredi', samedi: 'Samedi', dimanche: 'Dimanche',
+};
+
+const site = (await getEntry('site', 'site'))!.data;
+const cours = (await getCollection('planning')).map((c) => c.data);
+
+// Le dimanche n'apparaît que s'il y a des cours ce jour-là.
+const jours = JOURS.filter((j) => j !== 'dimanche' || cours.some((c) => c.jour === j)).map((id) => ({
+  id,
+  libelle: LIBELLES_JOURS[id],
+  cours: cours.filter((c) => c.jour === id).sort((a, b) => a.debut.localeCompare(b.debut)),
+}));
+
+// "07:00" → "7h00"
+const heure = (h: string) => h.replace(/^0(\d)/, '$1').replace(':', 'h');
+
+const filtres = [
+  { nom: 'discipline', legende: 'Discipline', options: [['tous', 'Toutes'], ['muay-thai', 'Muay Thai'], ['mma', 'MMA']] },
+  { nom: 'public', legende: 'Public', options: [['tous', 'Tous'], ['adultes', 'Adultes'], ['feminin', '100 % féminin'], ['ados', 'Ados'], ['kids', 'Kids']] },
+  { nom: 'salle', legende: 'Salle', options: [['toutes', 'Toutes'], ['ordener', site.salles.ordener.nom], ['ney', site.salles.ney.nom]] },
+];
+---
+
+<div class="planning" data-planning>
+  <form class="planning__filtres" data-filtres hidden aria-label="Filtrer le planning">
+    {
+      filtres.map((f) => (
+        <fieldset class="filtre">
+          <legend class="filtre__legende">{f.legende}</legend>
+          <div class="filtre__options">
+            {f.options.map(([valeur, libelle], i) => (
+              <label class="puce">
+                <input type="radio" name={f.nom} value={valeur} checked={i === 0} />
+                <span>{libelle}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      ))
+    }
+    <p class="planning__compte" aria-live="polite" data-compte></p>
+  </form>
+
+  <ul class="planning__legende" aria-label="Légende des salles">
+    <li><span class="pastille pastille--ordener" aria-hidden="true"></span>{site.salles.ordener.nom} · {site.salles.ordener.adresse}</li>
+    <li><span class="pastille pastille--ney" aria-hidden="true"></span>{site.salles.ney.nom} · {site.salles.ney.adresse}</li>
+  </ul>
+
+  <div class="planning__grille">
+    {
+      jours.map((j) => (
+        <section class="jour" data-jour={j.id} aria-labelledby={`jour-${j.id}`}>
+          <h3 class="jour__titre" id={`jour-${j.id}`}>
+            {j.libelle}
+            <span class="jour__aujourdhui" hidden>Aujourd'hui</span>
+          </h3>
+          <ul class="jour__liste">
+            {j.cours.map((c) => (
+              <li
+                class={`cours cours--${c.salle}`}
+                data-disciplines={c.disciplines.join(' ')}
+                data-public={c.public}
+                data-salle={c.salle}
+              >
+                <p class="cours__heure">
+                  <time datetime={c.debut}>{heure(c.debut)}</time> – <time datetime={c.fin}>{heure(c.fin)}</time>
+                </p>
+                <p class="cours__titre">{typo(c.intitule)}</p>
+                <p class="cours__salle">{site.salles[c.salle].nom}</p>
+              </li>
+            ))}
+          </ul>
+          <p class="jour__vide" hidden={j.cours.length > 0}>Aucun cours</p>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .planning__filtres {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+  }
+  .filtre { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .filtre__legende {
+    float: left;
+    min-width: 6.5em;
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--texte-doux);
+    padding: 0;
+  }
+  .filtre__options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .puce { position: relative; cursor: pointer; }
+  .puce input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .puce span {
+    display: inline-block;
+    padding: 6px 14px;
+    min-height: 36px;
+    border: 1px solid var(--bord);
+    border-radius: 999px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    background: rgb(255 255 255 / 0.03);
+  }
+  .puce input:checked + span { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+  .puce input:focus-visible + span { outline: 3px solid var(--rouge-texte); outline-offset: 2px; }
+  .planning__compte { margin: 0; color: var(--texte-doux); font-size: 0.95rem; }
+
+  .planning__legende {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    color: var(--texte-doux);
+    font-size: 0.95rem;
+  }
+  .planning__legende li { display: flex; align-items: center; gap: 8px; }
+  .pastille { width: 18px; height: 18px; border-radius: 3px; display: inline-block; }
+  .pastille--ordener { background: var(--panneau-plein); border: 2px solid var(--texte); }
+  .pastille--ney { background: var(--rouge); border: 2px solid var(--rouge); }
+
+  .planning__grille {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) { .planning__grille { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .planning__grille { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1100px) { .planning__grille { grid-template-columns: repeat(6, 1fr); gap: 8px; } }
+
+  .jour {
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    padding: 12px;
+  }
+  .jour--aujourdhui { border-color: var(--rouge-texte); box-shadow: 0 0 0 1px var(--rouge-texte); }
+  .jour__titre {
+    font-size: 1.35rem;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .jour__aujourdhui {
+    font-family: var(--corps);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: var(--rouge);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .jour__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .jour__vide { color: var(--texte-doux); font-style: italic; margin: 0; }
+
+  .cours {
+    border-radius: var(--rayon);
+    padding: 10px 12px;
+    border: 2px solid var(--texte);
+    background: var(--panneau-plein);
+  }
+  .cours--ney { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+  .cours p { margin: 0; }
+  .cours__heure { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.95rem; }
+  .cours .cours__titre { font-family: var(--titres); letter-spacing: 0.03em; font-size: 1.05rem; line-height: 1.25; margin-block: 2px; }
+  .cours__salle { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
+</style>
+
+<script>
+  const racine = document.querySelector<HTMLElement>('[data-planning]');
+  const formulaire = racine?.querySelector<HTMLFormElement>('[data-filtres]');
+  const compte = racine?.querySelector<HTMLElement>('[data-compte]');
+
+  if (racine && formulaire && compte) {
+    const PAR_DEFAUT: Record<string, string> = { discipline: 'tous', public: 'tous', salle: 'toutes' };
+    formulaire.hidden = false;
+
+    // Filtres pré-sélectionnés depuis l'URL (ex. /cours/?salle=ney#planning)
+    const params = new URLSearchParams(location.search);
+    for (const nom of Object.keys(PAR_DEFAUT)) {
+      const valeur = params.get(nom);
+      if (!valeur) continue;
+      const option = [...formulaire.querySelectorAll<HTMLInputElement>(`input[name="${nom}"]`)].find((i) => i.value === valeur);
+      if (option) option.checked = true;
+    }
+
+    const appliquer = () => {
+      const choix = Object.fromEntries(Object.keys(PAR_DEFAUT).map((n) => [n, String(new FormData(formulaire).get(n))]));
+      let total = 0;
+
+      racine.querySelectorAll<HTMLElement>('.jour').forEach((jour) => {
+        let visibles = 0;
+        jour.querySelectorAll<HTMLElement>('.cours').forEach((cours) => {
+          const ok =
+            (choix.discipline === 'tous' || cours.dataset.disciplines!.split(' ').includes(choix.discipline)) &&
+            (choix.public === 'tous' || cours.dataset.public === choix.public) &&
+            (choix.salle === 'toutes' || cours.dataset.salle === choix.salle);
+          cours.hidden = !ok;
+          if (ok) visibles++;
+        });
+        jour.querySelector<HTMLElement>('.jour__vide')!.hidden = visibles > 0;
+        total += visibles;
+      });
+
+      compte.textContent = `${total} cours ${total > 1 ? 'affichés' : 'affiché'}`;
+
+      const url = new URL(location.href);
+      for (const [nom, defaut] of Object.entries(PAR_DEFAUT)) {
+        if (choix[nom] === defaut) url.searchParams.delete(nom);
+        else url.searchParams.set(nom, choix[nom]);
+      }
+      history.replaceState(null, '', url);
+    };
+
+    formulaire.addEventListener('change', appliquer);
+    appliquer();
+
+    const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+    const aujourdhui = racine.querySelector<HTMLElement>(`.jour[data-jour="${jours[new Date().getDay()]}"]`);
+    if (aujourdhui) {
+      aujourdhui.classList.add('jour--aujourdhui');
+      aujourdhui.querySelector<HTMLElement>('.jour__aujourdhui')!.hidden = false;
+    }
+  }
+</script>

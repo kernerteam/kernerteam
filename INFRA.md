@@ -69,16 +69,36 @@ Ce document décrit comment le site est hébergé, mis à jour et administré. I
 
 ## Emplacement du contenu
 
-| Contenu | Fichier(s) |
-|---|---|
-| Planning | `src/data/planning.yaml` |
-| Coachs | `src/content/coachs/*.md` (un fichier par coach) |
-| Tarifs | `src/data/tarifs.yaml` |
-| FAQ | `src/data/faq.yaml` |
-| Textes des pages | Markdown |
-| Documents (règlement, autorisation parentale, fiche d'adhésion) | `public/documents/` |
+| Contenu | Fichier(s) | Dans `/admin` |
+|---|---|---|
+| Planning | `src/data/planning.yaml` | Planning |
+| Coachs (texte + photo) | `src/content/coachs/*.md` et `*.jpg` (un fichier par coach, photo à côté) | Coachs |
+| Textes longs des pages | `src/content/textes/*.md` | Textes des pages |
+| Coordonnées, réseaux, adresses des salles | `src/data/site.yaml` | Infos, tarifs et FAQ → Coordonnées et salles |
+| Tarifs | `src/data/tarifs.yaml` | Infos, tarifs et FAQ → Tarifs |
+| FAQ | `src/data/faq.yaml` (la question sur le cours d'essai est dans `src/content/textes/essai.md`) | Infos, tarifs et FAQ → FAQ |
+| Titres et atouts de l'accueil | `src/data/accueil.yaml` | Infos, tarifs et FAQ → Accueil |
+| Documents à télécharger | `src/data/documents.yaml` + fichiers dans `public/documents/` | Infos, tarifs et FAQ → Documents |
 
-Les noms de fichiers exacts pourront changer pendant le développement. La référence est `public/admin/config.yml`.
+Les règles de validation sont dans `src/content.config.ts`, les formulaires de l'admin dans `public/admin/config.yml`. Les deux doivent rester cohérents.
+
+Les photos des salles, le logo, le portrait de Guillaume, le bandeau d'archives et le fond (`background.png`) sont dans `src/assets/images/`. Ils ne sont pas modifiables depuis `/admin` : les changer demande une modification du code (voir `src/pages/index.astro` et `src/pages/equipe.astro`).
+
+## Développement local
+
+```sh
+npm install
+npm run dev       # site sur http://localhost:4321
+npm run build     # génère dist/ (c'est ce que fait Cloudflare Pages)
+```
+
+- Node.js 22.23 ou plus récent (le fichier `.node-version` fixe Node 24, lu aussi par Cloudflare Pages). Le projet utilise Astro 7 ; les espaces insécables de la typographie française passent par un plugin remark (`src/lib/typo.mjs`), d'où la dépendance `@astrojs/markdown-remark`.
+- **Tester `/admin` sans GitHub** : lancer `npm run dev`, ouvrir `http://localhost:4321/admin/` dans Chrome ou Edge et choisir « Work with Local Repository » (Sveltia CMS modifie alors directement les fichiers du dossier local).
+- Sveltia CMS est chargé depuis unpkg sans numéro de version (`public/admin/index.html`), ce qui le garde à jour automatiquement. En cas de régression d'une nouvelle version, on peut figer une version : `https://unpkg.com/@sveltia/cms@0.261.0/dist/sveltia-cms.js`.
+
+## Indexation par les moteurs de recherche
+
+Par défaut, toutes les pages portent `<meta name="robots" content="noindex">` : le site témoin ne doit pas apparaître dans Google. **En production**, ajouter la variable d'environnement `PUBLIC_INDEXABLE=true` dans Cloudflare Pages (Settings → Variables and Secrets), puis relancer un déploiement.
 
 ## Pourquoi ces choix
 
@@ -103,8 +123,8 @@ Les noms de fichiers exacts pourront changer pendant le développement. La réf�
 3. Ajouter `kernerteam.net` et `www.kernerteam.net` comme domaines personnalisés du projet Pages.
 4. Rediriger `kernerteam.com` vers `kernerteam.net` en HTTPS valide, par exemple en faisant aussi passer son DNS chez Cloudflare avec une règle de redirection. Ça corrige le certificat cassé.
 5. Mettre à jour l'URL de callback de l'application OAuth et le `base_url` si nécessaire.
-6. Une fois le nouveau site vérifié, **résilier l'abonnement GoDaddy Website Builder** (sans résilier le domaine).
-7. Remplacer le widget de messagerie GoDaddy par un lien statique (WhatsApp, `tel:`, `mailto:`).
+6. Ajouter la variable `PUBLIC_INDEXABLE=true` dans Cloudflare Pages pour autoriser l'indexation (voir plus haut).
+7. Une fois le nouveau site vérifié, **résilier l'abonnement GoDaddy Website Builder** (sans résilier le domaine).
 
 ## Passation
 

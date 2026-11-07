@@ -1,0 +1,134 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { typo } from '../lib/typo.mjs';
+
+const tarifs = (await getEntry('tarifs', 'tarifs'))!.data;
+const documents = (await getEntry('documents', 'documents'))!.data;
+const essai = (await getEntry('textes', 'essai'))!;
+const inscription = (await getEntry('textes', 'inscription'))!;
+const { Content: Essai } = await render(essai);
+const { Content: Inscription } = await render(inscription);
+
+const prix = (montant: number) => `${montant.toLocaleString('fr-FR')}\u00a0€`;
+const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
+---
+
+<Base titre="Tarifs & inscription" description="Tarifs de la Kerner Team (MMA, Muay Thai, kids, ados, cours 100 % féminin), cours d'essai, documents d'inscription.">
+  <section class="section">
+    <div class="conteneur">
+      <h1 class="titre-page">TARIFS</h1>
+      <div class="formules">
+        {
+          tarifs.formules.map((f) => (
+            <article class="formule">
+              <h2 class="formule__titre">{typo(f.titre)}</h2>
+              {f.detail && <p class="formule__detail">{f.detail}</p>}
+              <dl class="formule__prix">
+                {f.prix.map((p) => (
+                  <div>
+                    <dt>{p.libelle}</dt>
+                    <dd>{prix(p.montant)}</dd>
+                  </div>
+                ))}
+              </dl>
+            </article>
+          ))
+        }
+      </div>
+      {tarifs.paiement && <p class="paiement">{typo(tarifs.paiement)}</p>}
+    </div>
+  </section>
+
+  <section class="section section--panneau" id="essai">
+    <div class="conteneur conteneur--etroit">
+      <h2 class="titre-section">COURS D'ESSAI</h2>
+      <h3 class="question">{typo(essai.data.titre)}</h3>
+      <div class="texte-long"><Essai /></div>
+    </div>
+  </section>
+
+  <section class="section" id="inscription">
+    <div class="conteneur conteneur--etroit">
+      <h2 class="titre-section">{inscription.data.titre}</h2>
+      <div class="texte-long inscription"><Inscription /></div>
+
+      <h3 class="documents__titre">{documents.titre}</h3>
+      <ul class="documents">
+        {
+          documents.documents.map((d) => (
+            <li>
+              <a href={d.fichier} download>
+                <span class="documents__nom">{d.titre}</span>
+                <span class="documents__format">{format(d.fichier)} · Télécharger</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .formules {
+    display: grid;
+    gap: 16px;
+    margin-top: 32px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+  .formule {
+    background: var(--panneau);
+    border: 1px solid var(--bord);
+    border-top: 4px solid var(--rouge);
+    border-radius: var(--rayon);
+    padding: 24px;
+  }
+  .formule__titre { font-size: 1.5rem; margin: 0; }
+  .formule__detail { color: var(--rouge-texte); font-family: var(--titres); letter-spacing: 0.05em; margin: 4px 0 0; }
+  .formule__prix { margin: 20px 0 0; display: grid; gap: 4px; }
+  .formule__prix div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding-block: 8px;
+    border-bottom: 1px dashed var(--bord);
+  }
+  .formule__prix div:last-child { border-bottom: 0; }
+  .formule__prix dt { color: var(--texte-doux); font-size: 0.95rem; letter-spacing: 0.04em; }
+  .formule__prix dd { margin: 0; font-family: var(--titres); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+  .paiement {
+    margin-top: 24px;
+    padding: 14px 18px;
+    border-left: 4px solid var(--rouge);
+    background: var(--panneau);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .conteneur--etroit { max-width: calc(820px + 2 * var(--gouttiere)); }
+  .question { font-family: var(--corps); text-transform: none; letter-spacing: 0; font-weight: 600; font-size: 1.2rem; }
+  .texte-long :global(ul) { padding-left: 1.2em; }
+  .texte-long :global(li) { margin-bottom: 0.4em; }
+  .inscription :global(p:first-child) { font-weight: 600; }
+
+  .documents__titre { margin-top: 40px; font-size: 1.4rem; }
+  .documents { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .documents a {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px 16px;
+    padding: 16px 20px;
+    background: var(--panneau-plein);
+    border: 1px solid var(--bord);
+    border-left: 4px solid var(--rouge);
+    border-radius: var(--rayon);
+    text-decoration: none;
+  }
+  .documents a:hover { border-color: var(--rouge-texte); color: var(--texte); }
+  .documents__nom { font-family: var(--titres); letter-spacing: 0.04em; font-size: 1.1rem; }
+  .documents__format { color: var(--rouge-texte); font-size: 0.9rem; font-weight: 600; }
+</style>

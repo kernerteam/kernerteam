@@ -1,0 +1,19 @@
+titre_salles: 2 SALLES EN PLEIN CENTRE DE PARIS
+titre_atouts: POURQUOI CHOISIR KERNER TEAM ?
+atouts:
+  - titre: FORMATION D'EXPERTS
+    texte: Bénéficiez de l’expertise de Guillaume Kerner et de nos coachs expérimentés, qui vous guideront dans la maîtrise de l’art du MUAY THAI.
+    lien_libelle: NOS COACHS
+    lien: /equipe/#coachs
+  - titre: SALLES DE SPORT PROFESSIONNELLES
+    texte: Formez-vous dans une installation moderne et bien équipée conçue pour tous les niveaux de pratique.
+    lien_libelle: NOS SALLES
+    lien: /#salles
+  - titre: TOUS NIVEAUX
+    texte: Que vous soyez débutant ou combattant expérimenté, notre salle de sport s'adresse à tous, favorisant une atmosphère solidaire.
+    lien_libelle: NOS COURS
+    lien: /cours/
+  - titre: HÉRITAGE DES CHAMPIONS
+    texte: Découvrez l'héritage d'un champion du monde et découvrez les secrets du succès sur le ring.
+    lien_libelle: GUILLAUME KERNER
+    lien: /equipe/#guillaume
