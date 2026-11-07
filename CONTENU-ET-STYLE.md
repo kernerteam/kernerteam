@@ -41,7 +41,7 @@ Règles éditoriales et visuelles de la refonte. Pour l'hébergement et la mise 
 
 | Salle | Caractéristiques visuelles | Photos disponibles |
 |---|---|---|
-| **21 rue Ordener** | Tatamis noirs au sol et aux murs, logos KT sur les murs, sacs de frappe, cage, baies vitrées | Les 3 photos du site actuel (`blob-8680243`, `blob-9df1677`, `blob-a91d1d0`) |
+| **21 rue Ordener** | Tatamis noirs au sol et aux murs, logos KT sur les murs, sacs de frappe, cage, baies vitrées | Les 3 photos du site actuel (`blob-8680243`, `blob-9df1677`, `blob-a91d1d0`). **À mettre en avant : `ordener-1.jpg` (baies vitrées)**, la salle où ont lieu la plupart des entraînements, puis `ordener-3.jpg` (même salle, côté cage). `ordener-2.jpg` montre l'espace en sous-sol des compétiteurs : jamais en photo principale |
 | **101 boulevard Ney** | Salle avec un ring de boxe (salles de sport municipales Ney) | Aucune pour l'instant. À trouver (voir la règle 4). Dans le site témoin : un emplacement « photo à venir » |
 
 ### Recherche en ligne (novembre 2026)
