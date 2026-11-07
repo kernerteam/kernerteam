@@ -53,6 +53,12 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
       <h2 class="titre-section">{inscription.data.titre}</h2>
       <div class="texte-long inscription"><Inscription /></div>
 
+      <div class="en-ligne">
+        <h3 class="en-ligne__titre">Remplir le dossier en ligne</h3>
+        <p>Fiche d'adhésion, autorisation parentale et règlement intérieur remplis automatiquement, en un seul PDF à imprimer.</p>
+        <a class="bouton" href="/inscription/">Remplir mon dossier</a>
+      </div>
+
       <h3 class="documents__titre">{documents.titre}</h3>
       <ul class="documents">
         {
@@ -113,6 +119,15 @@ const format = (fichier: string) => fichier.split('.').pop()!.toUpperCase();
   .texte-long :global(li) { margin-bottom: 0.4em; }
   .inscription :global(p:first-child) { font-weight: 600; }
 
+  .en-ligne {
+    margin-top: 32px;
+    padding: 24px;
+    background: var(--panneau-plein);
+    border: 1px solid var(--rouge);
+    border-radius: var(--rayon);
+  }
+  .en-ligne__titre { font-size: 1.5rem; margin-bottom: 0.4em; }
+  .en-ligne p { color: var(--texte-doux); }
   .documents__titre { margin-top: 40px; font-size: 1.4rem; }
   .documents { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
   .documents a {

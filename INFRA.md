@@ -96,6 +96,15 @@ npm run build     # génère dist/ (c'est ce que fait Cloudflare Pages)
 - **Tester `/admin` sans GitHub** : lancer `npm run dev`, ouvrir `http://localhost:4321/admin/` dans Chrome ou Edge et choisir « Work with Local Repository » (Sveltia CMS modifie alors directement les fichiers du dossier local).
 - Sveltia CMS est chargé depuis unpkg sans numéro de version (`public/admin/index.html`), ce qui le garde à jour automatiquement. En cas de régression d'une nouvelle version, on peut figer une version : `https://unpkg.com/@sveltia/cms@0.261.0/dist/sveltia-cms.js`.
 
+## Dossier d'inscription en ligne
+
+La page `/inscription/` remplit les documents originaux (fiche d'adhésion, autorisation parentale pour les mineurs, règlement intérieur) et les rassemble en un seul PDF.
+
+- **Tout se passe dans le navigateur** (bibliothèque `pdf-lib`, chargée uniquement au moment de générer le PDF). Aucune donnée n'est envoyée ni stockée : pas de serveur, pas de base de données, pas de question RGPD liée au stockage.
+- **Modèles utilisés** : `src/assets/modeles/` (copies figées des documents). Les documents téléchargeables de `public/documents/` (modifiables depuis `/admin`) en sont indépendants : remplacer un document dans l'admin ne casse pas le générateur.
+- **Positions des champs** : en pixels sur les images de référence, dans `src/lib/inscription.ts` (cases d'abonnement) et `src/lib/dossier-pdf.ts` (tous les autres champs). Si un modèle change, il faut remplacer le fichier dans `src/assets/modeles/` et recaler ces coordonnées.
+- Le dossier n'est pas transmis automatiquement au club : l'adhérent l'imprime et l'apporte avec le certificat médical. Un envoi automatique demanderait un service d'envoi (Worker + e-mail) et une réflexion RGPD (données de mineurs, données de santé).
+
 ## Indexation par les moteurs de recherche
 
 Par défaut, toutes les pages portent `<meta name="robots" content="noindex">` : le site témoin ne doit pas apparaître dans Google. **En production**, ajouter la variable d'environnement `PUBLIC_INDEXABLE=true` dans Cloudflare Pages (Settings → Variables and Secrets), puis relancer un déploiement.

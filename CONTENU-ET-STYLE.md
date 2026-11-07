@@ -19,6 +19,7 @@ Règles éditoriales et visuelles de la refonte. Pour l'hébergement et la mise 
 | **L'équipe** | Histoire de Guillaume Kerner (« L'Ange Blond ») et fiches des coachs |
 | **Tarifs & inscription** | Grille tarifaire, pièces à fournir, fermetures, documents à télécharger, conditions du cours d'essai |
 
+- **Page complémentaire `/inscription/`** (hors menu, rattachée à « Tarifs & inscription ») : formulaire qui génère le dossier d'inscription en PDF à partir des documents originaux. Ses textes d'aide sont des textes d'interface, pas des textes de Guillaume.
 - **Pied de page commun** à toutes les pages : adresses des 2 salles, téléphone, e-mail, réseaux sociaux (Facebook, Instagram, YouTube). Il n'y a donc pas de page Contact.
 - La page « À propos » disparaît, mais **tout son texte est repris** sur l'accueil.
 
@@ -121,6 +122,13 @@ La première version sert de maquette à montrer à Guillaume, sans engagement. 
 - Les adresses en double sur l'accueil (bd Ney ×5, Ordener ×1).
 - Le nom « Alison Sidharta » répété sous les fiches de Khavaj et de Julien.
 - Le titre « MUAY THAI KIDS / ADOS » placé au-dessus du texte du cours 100 % féminin.
+
+### Planning
+
+- Grand écran : calendrier avec axe horaire ; chaque cours est placé à sa hauteur réelle, les cours simultanés côte à côte, les heures sans cours repliées.
+- Petit écran : un onglet par jour, ouvert sur le jour courant.
+- Horaires au format court : « 7h », « 12h30 ».
+- La salle est toujours écrite en toutes lettres sur le cours, en plus de la couleur (rouge = boulevard Ney).
 
 ### Typographie automatique
 

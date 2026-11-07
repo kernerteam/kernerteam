@@ -27,6 +27,8 @@ const pages = [
   { href: '/tarifs/', libelle: 'Tarifs & inscription' },
 ];
 const chemin = Astro.url.pathname.replace(/\/?$/, '/');
+// La page /inscription/ fait partie de la rubrique « Tarifs & inscription ».
+const rubrique = chemin.startsWith('/inscription/') ? '/tarifs/' : chemin;
 const titreComplet = titre ? `${titre} – Kerner Team` : 'École de Boxe Thai – Kerner Team';
 
 // Le site témoin ne doit pas être indexé. En production : variable PUBLIC_INDEXABLE=true.
@@ -72,7 +74,7 @@ const telLien = `tel:${site.telephone.replace(/\s/g, '')}`;
             {
               pages.map((p) => (
                 <li>
-                  <a href={p.href} aria-current={chemin === p.href ? 'page' : undefined}>
+                  <a href={p.href} aria-current={rubrique === p.href ? 'page' : undefined}>
                     {p.libelle}
                   </a>
                 </li>
