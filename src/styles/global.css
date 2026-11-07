@@ -134,7 +134,7 @@ p:last-child { margin-bottom: 0; }
   gap: 10px;
   text-decoration: none;
 }
-.marque__logo { width: auto; }
+.marque__logo { flex: none; } /* taille donnée par les attributs width/height */
 .marque__nom { font-family: var(--titres); font-size: 1.35rem; letter-spacing: 0.06em; }
 
 .navigation ul {

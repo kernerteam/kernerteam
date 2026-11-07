@@ -8,7 +8,7 @@ backend:
   repo: kernerteam/kernerteam
   branch: main
   # À REMPLACER par l'URL du Worker Cloudflare sveltia-cms-auth (voir INFRA.md).
-  base_url: https://sveltia-cms-auth.A-REMPLACER.workers.dev
+  base_url: https://kernerteam.kerner-team.workers.dev
   commit_messages:
     create: "Ajout de {{collection}} « {{slug}} »"
     update: "Mise à jour de {{collection}} « {{slug}} »"

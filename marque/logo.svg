@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500" role="img" aria-labelledby="title">
+  <title id="title">Kerner Team — logo KT</title>
+  <defs>
+    <linearGradient id="red" x1="0" y1="61" x2="0" y2="437" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B60F13"/>
+      <stop offset="0.45" stop-color="#BA1418"/>
+      <stop offset="0.78" stop-color="#BA1416"/>
+      <stop offset="1" stop-color="#A71920"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#red)" d="M114 61 H189 V191 Q189 199 196 199 H201 Q207 199 207 192 V61 H387 L365 88 H333 V337 L276 437 V89 H264 V201 L251 216 L264 232 V437 L207 337 V239 Q207 231 201 231 H196 Q189 231 189 239 V337 H134 V80 Q134 77 130 74 Z"/>
+</svg>
