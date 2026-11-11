@@ -1,8 +1,10 @@
 ---
 // Planning des cours.
-// - Grand écran : calendrier avec axe horaire. Chaque cours est placé à sa hauteur réelle ;
+// - Calendrier avec axe horaire, sur tous les écrans. Chaque cours est placé à sa hauteur réelle ;
 //   les cours qui se chevauchent sont côte à côte ; les heures sans aucun cours sont repliées.
-// - Petit écran : un onglet par jour (sans JavaScript, tous les jours s'affichent à la suite).
+//   Sur petit écran, la semaine défile horizontalement (colonne des heures fixe), en partant d'aujourd'hui.
+// - Petit écran uniquement : un bouton « Semaine / Jour » permet de passer à une liste par jour
+//   (un onglet par jour). Le choix est mémorisé dans le navigateur.
 import { getCollection, getEntry } from 'astro:content';
 import { JOURS } from '../content.config';
 import { typo } from '../lib/typo.mjs';
@@ -123,7 +125,12 @@ const attributsCours = (c: (typeof cours)[number]) => ({
     </ul>
   </div>
 
-  <!-- Grand écran : calendrier -->
+  <div class="planning__vues" role="group" aria-label="Affichage du planning" data-vues hidden>
+    <button type="button" class="vue" data-vue="semaine" aria-pressed="true">Semaine</button>
+    <button type="button" class="vue" data-vue="jour" aria-pressed="false">Jour</button>
+  </div>
+
+  <!-- Calendrier -->
   <div class="calendrier" style={`--unites: ${totalUnites}; --jours: ${jours.length}`}>
     <div class="calendrier__entetes">
       <span></span>
@@ -305,13 +312,10 @@ const attributsCours = (c: (typeof cours)[number]) => ({
   .cours .cours__titre { font-family: var(--titres); letter-spacing: 0.03em; line-height: 1.2; }
   .cours .cours__salle { text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.85; }
 
-  /* ---------- Calendrier (grand écran) ---------- */
-  .calendrier { display: none; --u: 7px; }
+  /* ---------- Calendrier ---------- */
+  .calendrier { --u: 7px; }
+  .planning .liste { display: none; }
 
-  @media (min-width: 1024px) {
-    .calendrier { display: block; }
-    .planning .liste { display: none; }
-  }
 
   .calendrier__entetes,
   .calendrier__corps {
@@ -404,6 +408,52 @@ const attributsCours = (c: (typeof cours)[number]) => ({
   .cours--etroit .cours__heure { font-size: 0.7rem; letter-spacing: -0.01em; white-space: nowrap; }
   .cours--etroit .cours__titre { font-size: 0.84rem; }
   .cours--etroit .cours__salle { font-size: 0.58rem; letter-spacing: 0.03em; }
+
+  /* Petit écran : la semaine entière, qui défile horizontalement. */
+  @media (max-width: 1023px) {
+    /* Vue « Jour » choisie : la liste par jour remplace le calendrier. */
+    .planning--vue-jour .calendrier { display: none; }
+    .planning.planning--vue-jour .liste { display: grid; }
+    .calendrier {
+      --col: 150px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+    .calendrier__entetes,
+    .calendrier__corps { min-width: calc(44px + var(--jours) * (var(--col) + 6px)); }
+    .calendrier__entetes { position: static; }
+    .calendrier__jour { font-size: 1.1rem; }
+    /* Colonne des heures fixe pendant le défilement */
+    .calendrier__entetes > span:first-child,
+    .calendrier__axe { position: sticky; left: 0; z-index: 3; background: var(--noir); }
+    .calendrier__axe { box-shadow: 6px 0 8px -6px rgb(0 0 0 / 0.9); }
+  }
+
+  /* ---------- Choix de la vue (petit écran) ---------- */
+  .planning__vues {
+    display: inline-flex;
+    margin-bottom: 12px;
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon);
+    overflow: hidden;
+  }
+  @media (min-width: 1024px) { .planning__vues { display: none !important; } }
+  .vue {
+    font: inherit;
+    font-family: var(--titres);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texte);
+    background: var(--panneau-plein);
+    border: 0;
+    min-height: 40px;
+    padding: 6px 18px;
+    cursor: pointer;
+  }
+  .vue + .vue { border-left: 1px solid var(--bord); }
+  .vue[aria-pressed='true'] { background: var(--rouge); color: #fff; }
 
   /* ---------- Liste par jour (petit écran) ---------- */
   .onglets {
@@ -532,7 +582,39 @@ const attributsCours = (c: (typeof cours)[number]) => ({
       if (badge) badge.hidden = false;
     });
 
-    // ---- Onglets (petit écran)
+    // ---- Petit écran : le calendrier défile jusqu'à aujourd'hui
+    const calendrier = racine.querySelector<HTMLElement>('.calendrier');
+    const enTete = calendrier?.querySelector<HTMLElement>(`.calendrier__jour[data-jour="${aujourdhui}"]`);
+    const allerAAujourdhui = () => {
+      if (calendrier && enTete && calendrier.scrollWidth > calendrier.clientWidth) {
+        calendrier.scrollLeft = enTete.getBoundingClientRect().left - calendrier.getBoundingClientRect().left + calendrier.scrollLeft - 50;
+      }
+    };
+
+    // ---- Petit écran : choix « Semaine / Jour », mémorisé dans le navigateur
+    const vues = racine.querySelector<HTMLElement>('[data-vues]');
+    const CLE_VUE = 'kernerteam:planning-vue';
+    const afficherVue = (vue: string) => {
+      racine.classList.toggle('planning--vue-jour', vue === 'jour');
+      vues?.querySelectorAll<HTMLButtonElement>('[data-vue]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
+      if (vue === 'semaine') allerAAujourdhui();
+    };
+    if (vues) {
+      vues.hidden = false;
+      let vueMemorisee = 'semaine';
+      try { vueMemorisee = localStorage.getItem(CLE_VUE) === 'jour' ? 'jour' : 'semaine'; } catch {}
+      afficherVue(vueMemorisee);
+      vues.addEventListener('click', (e) => {
+        const bouton = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-vue]');
+        if (!bouton) return;
+        afficherVue(bouton.dataset.vue!);
+        try { localStorage.setItem(CLE_VUE, bouton.dataset.vue!); } catch {}
+      });
+    } else {
+      allerAAujourdhui();
+    }
+
+    // ---- Onglets (liste par jour)
     const boutons = [...onglets.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     const choisir = (jour: string, focus = false) => {
       boutons.forEach((b) => {
